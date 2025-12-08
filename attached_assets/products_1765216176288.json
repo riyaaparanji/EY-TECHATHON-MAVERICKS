@@ -1,0 +1,20 @@
+[
+  {
+    "pid": "p01",
+    "title": "Black Cotton Shirt",
+    "desc": "Men's black cotton shirt",
+    "price": 1299
+  },
+  {
+    "pid": "p02",
+    "title": "Blue Denim Shirt",
+    "desc": "Casual blue denim shirt",
+    "price": 1899
+  },
+  {
+    "pid": "p03",
+    "title": "White Linen Shirt",
+    "desc": "Breathable linen shirt",
+    "price": 1499
+  }
+]
