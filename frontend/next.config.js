@@ -4,16 +4,8 @@ module.exports = {
   async rewrites() {
     return [
       {
-        source: '/api/agents/:path*',
-        destination: 'http://localhost:8000/api/agents/:path*',
-      },
-      {
-        source: '/api/products',
-        destination: 'http://localhost:8000/api/products',
-      },
-      {
-        source: '/api/cart',
-        destination: 'http://localhost:8000/api/cart',
+        source: '/api/:path*',
+        destination: 'http://localhost:8000/api/:path*',
       },
     ]
   },

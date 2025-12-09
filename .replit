@@ -39,13 +39,13 @@ args = "Frontend"
 name = "Backend API"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload"
-waitForPort = 8000
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python app.py"
+waitForPort = 8000
 
 [[workflows.workflow]]
 name = "Frontend"
@@ -68,6 +68,10 @@ localPort = 8000
 externalPort = 8000
 
 [[ports]]
+localPort = 33123
+externalPort = 8081
+
+[[ports]]
 localPort = 33507
 externalPort = 5173
 
@@ -76,12 +80,12 @@ localPort = 34809
 externalPort = 8008
 
 [[ports]]
-localPort = 37181
-externalPort = 6000
+localPort = 36953
+externalPort = 8080
 
 [[ports]]
-localPort = 37535
-externalPort = 8099
+localPort = 37181
+externalPort = 6000
 
 [[ports]]
 localPort = 37731
@@ -92,12 +96,12 @@ localPort = 37847
 externalPort = 5000
 
 [[ports]]
-localPort = 41525
-externalPort = 6800
+localPort = 38945
+externalPort = 8099
 
 [[ports]]
-localPort = 42939
-externalPort = 8080
+localPort = 41525
+externalPort = 6800
 
 [[ports]]
 localPort = 42959
@@ -110,10 +114,6 @@ externalPort = 3000
 [[ports]]
 localPort = 46093
 externalPort = 4200
-
-[[ports]]
-localPort = 46293
-externalPort = 8081
 
 [[ports]]
 localPort = 46685

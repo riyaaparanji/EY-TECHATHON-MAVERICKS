@@ -1,1152 +1,985 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import {
-  ShoppingCart,
-  Send,
-  Sparkles,
-  ShoppingBag,
-  MessageCircle,
-  Heart,
-  Search,
-  TrendingUp,
-  Zap,
-  Star,
-  Filter,
-  Grid,
-  List,
-  X,
-  ChevronDown,
+  ShoppingCart, User, Package, Tag, CreditCard, Truck, MessageSquare,
+  LogOut, Plus, Minus, Trash2, Check, X, RefreshCw, Star, MapPin,
+  Calendar, Clock, ChevronRight, Gift, Percent, Search, Filter
 } from "lucide-react";
 
 interface Product {
+  id: number;
   pid: string;
   title: string;
-  desc: string;
+  description: string;
+  category: string;
   price: number;
+  stock: { S: number; M: number; L: number; XL: number };
 }
 
-interface Message {
-  role: "user" | "assistsant";
-  content: string;
-  timestamp: Date;
+interface CartItem {
+  id: number;
+  product: Product;
+  size: string;
+  quantity: number;
+  subtotal: number;
 }
 
-const getProductImage = (title: string, desc: string): string => {
-  const text = `${title} ${desc}`.toLowerCase();
+interface Offer {
+  id: number;
+  bank_name: string;
+  discount_percent: number;
+  max_discount: number;
+  min_order: number;
+  description: string;
+}
 
-  if (
-    text.includes("black cotton shirt") // <- lowercase
-  ) {
-    return "https://skream.in/cdn/shop/files/anarchybillieeilishoversizedtee.webp?v=1750396309";
-  }
+interface OrderType {
+  id: number;
+  order_number: string;
+  total: number;
+  status: string;
+  date: string;
+}
 
-  if (text.includes("white linen shirt")) {
-    return "https://i.pinimg.com/564x/31/70/d3/3170d3bc95a5610577807ce243dee17b.jpg";
-  }
+interface StoreSlot {
+  id: string;
+  date: string;
+  time: string;
+  store: string;
+}
 
-  if (text.includes("blue denim")) {
-    return "https://powerlook.in/cdn/shop/files/1395621_3.jpg?v=1755937736";
-  }
-
-  const fallbackImages = [
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop",
-  ];
-
-  const hash = title.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
-  return fallbackImages[hash % fallbackImages.length];
-};
+type ViewType = "dashboard" | "catalog" | "cart" | "checkout" | "orders" | "support";
 
 export default function Dashboard() {
+  const router = useRouter();
+  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+  const [user, setUser] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [cart, setCart] = useState<{ items: CartItem[]; total: number }>({ items: [], total: 0 });
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [orders, setOrders] = useState<OrderType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearchModal, setShowSearchModal] = useState(false);
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [sortBy, setSortBy] = useState<
-    "default" | "price-low" | "price-high" | "name"
-  >("default");
-  const [priceRange, setPriceRange] = useState<
-    "all" | "under500" | "500-1000" | "over1000"
-  >("all");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [checkoutStep, setCheckoutStep] = useState(1);
+  const [orderType, setOrderType] = useState<"online" | "store">("online");
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "cod">("upi");
+  const [selectedOffer, setSelectedOffer] = useState<number | null>(null);
+  const [paymentResult, setPaymentResult] = useState<any>(null);
+  const [storeSlots, setStoreSlots] = useState<StoreSlot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [orderResult, setOrderResult] = useState<any>(null);
+  const [paymentAttempts, setPaymentAttempts] = useState(0);
+  const [aiMessage, setAiMessage] = useState("");
+  const [feedbackOrder, setFeedbackOrder] = useState<number | null>(null);
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [returnOrder, setReturnOrder] = useState<number | null>(null);
+  const [returnReason, setReturnReason] = useState("");
+  const [trackingData, setTrackingData] = useState<any>(null);
 
-  useEffect(() => {
-    fetch("/api/products")
-      .then((r) => r.json())
-      .then((data) => {
-        setProducts(data);
-        setFilteredProducts(data);
-      });
-  }, []);
+  const categories = ["all", "shirt", "pants", "belt", "ethnic", "innerwear", "athleisure"];
 
-  useEffect(() => {
-    let result = [...products];
+  const getToken = () => localStorage.getItem("token");
 
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.title.toLowerCase().includes(query) ||
-          p.desc.toLowerCase().includes(query),
-      );
-    }
-
-    if (priceRange !== "all") {
-      result = result.filter((p) => {
-        if (priceRange === "under500") return p.price < 500;
-        if (priceRange === "500-1000") return p.price >= 500 && p.price <= 1000;
-        if (priceRange === "over1000") return p.price > 1000;
-        return true;
-      });
-    }
-
-    if (sortBy === "price-low") {
-      result.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price-high") {
-      result.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "name") {
-      result.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    setFilteredProducts(result);
-  }, [products, searchQuery, sortBy, priceRange]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
-    if (showSearchModal && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [showSearchModal]);
-
-  async function sendToAgent(msg: string) {
-    if (!msg.trim()) return;
-
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: msg, timestamp: new Date() },
-    ]);
-    setInputValue("");
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/agents/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
-      });
-      const j = await res.json();
-
-      let response = "";
-      if (j.reply) response = j.reply;
-      else if (j.message) response = j.message;
-      else if (j.ui?.title) response = j.ui.title;
-      else if (j.products)
-        response = `Found ${j.products.length} products: ${j.products.join(", ")}`;
-      else response = JSON.stringify(j, null, 2);
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: response, timestamp: new Date() },
-      ]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Error connecting to assistant",
-          timestamp: new Date(),
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendToAgent(inputValue);
-    }
-  };
-
-  const toggleFavorite = (pid: string) => {
-    setFavorites((prev) => {
-      const newFavs = new Set(prev);
-      if (newFavs.has(pid)) newFavs.delete(pid);
-      else newFavs.add(pid);
-      return newFavs;
+  const authFetch = async (url: string, options: RequestInit = {}) => {
+    const token = getToken();
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
   };
 
-  const clearFilters = () => {
-    setSearchQuery("");
-    setSortBy("default");
-    setPriceRange("all");
-    setShowFilterModal(false);
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.push("/");
+      return;
+    }
+    loadInitialData();
+  }, [router]);
+
+  useEffect(() => {
+    let filtered = products;
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (p) =>
+          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    setFilteredProducts(filtered);
+  }, [products, selectedCategory, searchQuery]);
+
+  const loadInitialData = async () => {
+    try {
+      const [dashRes, productsRes, cartRes, offersRes, ordersRes] = await Promise.all([
+        authFetch("/api/dashboard"),
+        fetch("/api/products"),
+        authFetch("/api/cart"),
+        fetch("/api/agents/offers"),
+        authFetch("/api/orders"),
+      ]);
+
+      if (dashRes.ok) {
+        const data = await dashRes.json();
+        setDashboardData(data);
+        setUser(data.profile);
+      }
+      if (productsRes.ok) setProducts(await productsRes.json());
+      if (cartRes.ok) setCart(await cartRes.json());
+      if (offersRes.ok) setOffers(await offersRes.json());
+      if (ordersRes.ok) setOrders(await ordersRes.json());
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        padding: "32px 24px",
-        maxWidth: "1800px",
-        margin: "0 auto",
-        position: "relative",
-        zIndex: 1,
-        background: "#000000",
-      }}
-    >
-      {/* Search Modal */}
-      {showSearchModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.9)",
-            zIndex: 100,
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            paddingTop: "120px",
-          }}
-          onClick={() => setShowSearchModal(false)}
-        >
-          <div
-            style={{
-              background: "#111111",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              borderRadius: "16px",
-              padding: "24px",
-              width: "100%",
-              maxWidth: "600px",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Search size={24} color="#888888" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setShowSearchModal(false);
-                  }
-                }}
-                style={{
-                  flex: 1,
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  fontSize: "20px",
-                  color: "#FFFFFF",
-                }}
-              />
-              <button
-                onClick={() => setShowSearchModal(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "8px",
-                }}
-              >
-                <X size={24} color="#888888" />
-              </button>
-            </div>
-            {searchQuery && (
-              <div
-                style={{
-                  marginTop: "16px",
-                  color: "#888888",
-                  fontSize: "14px",
-                }}
-              >
-                Found {filteredProducts.length} products
-              </div>
-            )}
-          </div>
+  const addToCart = async (productId: number, size: string = "M") => {
+    const res = await authFetch("/api/cart", {
+      method: "POST",
+      body: JSON.stringify({ product_id: productId, size, quantity: 1 }),
+    });
+    if (res.ok) {
+      const cartRes = await authFetch("/api/cart");
+      if (cartRes.ok) setCart(await cartRes.json());
+    }
+  };
+
+  const removeFromCart = async (itemId: number) => {
+    const res = await authFetch(`/api/cart/${itemId}`, { method: "DELETE" });
+    if (res.ok) {
+      const cartRes = await authFetch("/api/cart");
+      if (cartRes.ok) setCart(await cartRes.json());
+    }
+  };
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const res = await authFetch("/api/checkout", {
+        method: "POST",
+        body: JSON.stringify({
+          order_type: orderType,
+          payment_method: paymentMethod,
+          offer_id: selectedOffer,
+        }),
+      });
+      const data = await res.json();
+      setPaymentResult(data);
+
+      if (data.success) {
+        setOrderResult(data.order);
+        if (data.ai_message) setAiMessage(data.ai_message);
+        if (data.store_slots) setStoreSlots(data.store_slots);
+        setCheckoutStep(orderType === "store" ? 4 : 5);
+        setCart({ items: [], total: 0 });
+      } else {
+        setPaymentAttempts((prev) => prev + 1);
+        if (data.payment?.redirect_to_store) {
+          setCheckoutStep(4);
+          const slotsRes = await authFetch("/api/agents/fulfillment/slots");
+          if (slotsRes.ok) setStoreSlots(await slotsRes.json());
+        } else {
+          setCheckoutStep(3);
+        }
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const retryPayment = async () => {
+    setLoading(true);
+    try {
+      const res = await authFetch("/api/checkout/retry", {
+        method: "POST",
+        body: JSON.stringify({
+          order_id: orderResult?.id || paymentResult?.order?.id,
+          payment_method: paymentMethod,
+        }),
+      });
+      const data = await res.json();
+      setPaymentResult(data);
+
+      if (data.success) {
+        setCheckoutStep(5);
+      } else {
+        setPaymentAttempts((prev) => prev + 1);
+        if (paymentAttempts >= 1) {
+          setCheckoutStep(4);
+        }
+      }
+    } catch (error) {
+      console.error("Retry error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmSlot = async () => {
+    if (!selectedSlot) return;
+    const res = await authFetch("/api/checkout/confirm-slot", {
+      method: "POST",
+      body: JSON.stringify({ order_id: orderResult?.id, slot_id: selectedSlot }),
+    });
+    if (res.ok) {
+      setCheckoutStep(5);
+    }
+  };
+
+  const trackOrder = async (orderId: number) => {
+    const res = await authFetch(`/api/orders/${orderId}/track`);
+    if (res.ok) {
+      setTrackingData(await res.json());
+    }
+  };
+
+  const submitFeedback = async () => {
+    if (!feedbackOrder) return;
+    await authFetch("/api/orders/feedback", {
+      method: "POST",
+      body: JSON.stringify({
+        order_id: feedbackOrder,
+        rating: feedbackRating,
+        comment: feedbackComment,
+      }),
+    });
+    setFeedbackOrder(null);
+    setFeedbackComment("");
+  };
+
+  const submitReturn = async () => {
+    if (!returnOrder) return;
+    await authFetch("/api/orders/return", {
+      method: "POST",
+      body: JSON.stringify({
+        order_id: returnOrder,
+        reason: returnReason,
+        request_type: "return",
+      }),
+    });
+    setReturnOrder(null);
+    setReturnReason("");
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/");
+  };
+
+  if (loading && !user) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div className="skeleton" style={{ width: 60, height: 60, borderRadius: "50%", margin: "0 auto 20px" }} />
+          <p style={{ color: "rgba(255,255,255,0.6)" }}>Loading...</p>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Filter Modal */}
-      {showFilterModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.9)",
-            zIndex: 100,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => setShowFilterModal(false)}
-        >
-          <div
-            style={{
-              background: "#111111",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              borderRadius: "16px",
-              padding: "32px",
-              width: "100%",
-              maxWidth: "400px",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "24px",
-              }}
-            >
-              <h3
-                style={{ fontSize: "20px", fontWeight: 600, color: "#FFFFFF" }}
-              >
-                Filters
-              </h3>
-              <button
-                onClick={() => setShowFilterModal(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "8px",
-                }}
-              >
-                <X size={24} color="#888888" />
-              </button>
-            </div>
-
-            <div style={{ marginBottom: "24px" }}>
-              <label
-                style={{
-                  display: "block",
-                  color: "#888888",
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                }}
-              >
-                Sort By
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                style={{
-                  width: "100%",
-                  padding: "12px 16px",
-                  background: "#1A1A1A",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  borderRadius: "8px",
-                  color: "#FFFFFF",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                <option value="default">Default</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name: A to Z</option>
-              </select>
-            </div>
-
-            <div style={{ marginBottom: "32px" }}>
-              <label
-                style={{
-                  display: "block",
-                  color: "#888888",
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                }}
-              >
-                Price Range
-              </label>
-              <select
-                value={priceRange}
-                onChange={(e) =>
-                  setPriceRange(e.target.value as typeof priceRange)
-                }
-                style={{
-                  width: "100%",
-                  padding: "12px 16px",
-                  background: "#1A1A1A",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  borderRadius: "8px",
-                  color: "#FFFFFF",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                <option value="all">All Prices</option>
-                <option value="under500">Under 500</option>
-                <option value="500-1000">500 - 1000</option>
-                <option value="over1000">Over 1000</option>
-              </select>
-            </div>
-
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button
-                onClick={clearFilters}
-                style={{
-                  flex: 1,
-                  padding: "14px",
-                  background: "transparent",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "8px",
-                  color: "#FFFFFF",
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Clear All
-              </button>
-              <button
-                onClick={() => setShowFilterModal(false)}
-                style={{
-                  flex: 1,
-                  padding: "14px",
-                  background: "#FFFFFF",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#000000",
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Apply
-              </button>
-            </div>
-          </div>
+  const renderSidebar = () => (
+    <aside style={{ width: 280, background: "rgba(255,255,255,0.02)", borderRight: "1px solid rgba(255,255,255,0.06)", padding: "24px", display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 40 }}>
+        <div style={{ width: 50, height: 50, background: "#fff", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
+          🛍️
         </div>
-      )}
+        <div>
+          <h2 style={{ fontSize: 18, fontWeight: 700 }}>Shopping</h2>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>AI Assistant</p>
+        </div>
+      </div>
 
-      {/* Premium Header */}
-      <header
+      <nav style={{ flex: 1 }}>
+        {[
+          { id: "dashboard", icon: User, label: "Dashboard" },
+          { id: "catalog", icon: Package, label: "Products" },
+          { id: "cart", icon: ShoppingCart, label: `Cart (${cart.items.length})` },
+          { id: "orders", icon: Truck, label: "Orders" },
+          { id: "support", icon: MessageSquare, label: "Support" },
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => {
+              setCurrentView(item.id as ViewType);
+              if (item.id === "checkout") setCheckoutStep(1);
+            }}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "14px 16px",
+              background: currentView === item.id ? "rgba(255,255,255,0.08)" : "transparent",
+              border: "none",
+              borderRadius: 12,
+              color: currentView === item.id ? "#fff" : "rgba(255,255,255,0.6)",
+              cursor: "pointer",
+              marginBottom: 8,
+              transition: "all 0.2s",
+            }}
+          >
+            <item.icon size={20} />
+            <span style={{ fontWeight: 500 }}>{item.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      <button
+        onClick={logout}
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "48px",
-          paddingBottom: "32px",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-          animation: "slideUp 0.6s ease-out",
+          gap: 12,
+          padding: "14px 16px",
+          background: "rgba(255,68,68,0.1)",
+          border: "1px solid rgba(255,68,68,0.2)",
+          borderRadius: 12,
+          color: "#ff4444",
+          cursor: "pointer",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <div
-            style={{
-              width: "64px",
-              height: "64px",
-              background: "#FFFFFF",
-              borderRadius: "20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 8px 32px rgba(255, 255, 255, 0.15)",
-            }}
-          >
-            <ShoppingBag size={32} color="#000000" strokeWidth={2.5} />
-          </div>
-          <div>
-            <h1
-              className="heading-md"
-              style={{ marginBottom: "6px", fontWeight: 800, color: "#FFFFFF" }}
-            >
-              Dashboard
-            </h1>
-            <p
-              className="body-sm"
-              style={{ color: "#666666", fontWeight: 500 }}
-            >
-              Premium shopping powered by AI
-            </p>
-          </div>
-        </div>
+        <LogOut size={20} />
+        <span style={{ fontWeight: 500 }}>Logout</span>
+      </button>
+    </aside>
+  );
 
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-          <button
-            onClick={() => setShowSearchModal(true)}
-            className="btn-secondary"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "12px 20px",
-            }}
-          >
-            <Search size={18} />
-            <span>Search</span>
-          </button>
+  const renderDashboard = () => (
+    <div style={{ padding: 32 }}>
+      <h1 className="heading-lg" style={{ marginBottom: 8 }}>Welcome, {user?.full_name}!</h1>
+      <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>Here's your shopping overview</p>
 
-          <button
-            onClick={() => setShowFilterModal(true)}
-            className="btn-secondary"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "12px 20px",
-              borderColor:
-                sortBy !== "default" || priceRange !== "all"
-                  ? "rgba(255, 255, 255, 0.4)"
-                  : undefined,
-            }}
-          >
-            <Filter size={18} />
-            <span>Filters</span>
-            {(sortBy !== "default" || priceRange !== "all") && (
-              <span
-                style={{
-                  background: "#FFFFFF",
-                  color: "#000000",
-                  borderRadius: "50%",
-                  width: "20px",
-                  height: "20px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {(sortBy !== "default" ? 1 : 0) +
-                  (priceRange !== "all" ? 1 : 0)}
-              </span>
-            )}
-          </button>
-
-          {searchQuery && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 16px",
-                background: "rgba(255, 255, 255, 0.05)",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "#888888",
-              }}
-            >
-              <span>"{searchQuery}"</span>
-              <button
-                onClick={() => setSearchQuery("")}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "2px",
-                  display: "flex",
-                }}
-              >
-                <X size={14} color="#888888" />
-              </button>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, marginBottom: 40 }}>
+        <div className="glass-card-strong" style={{ padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 44, height: 44, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <User size={22} color="#fff" />
             </div>
+            <h3 style={{ fontWeight: 600 }}>Profile</h3>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>{user?.email}</p>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}><MapPin size={14} style={{ display: "inline", marginRight: 4 }} />{user?.city}</p>
+          {dashboardData?.profile?.nearest_store && (
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 4 }}>Store: {dashboardData.profile.nearest_store.name}</p>
           )}
+        </div>
 
-          <div
-            className="badge badge-success"
-            style={{
-              padding: "12px 24px",
-              fontSize: "14px",
-            }}
-          >
-            <div
-              style={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: "#FFFFFF",
-                animation: "pulse 2s infinite",
-              }}
+        <div className="glass-card-strong" style={{ padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 44, height: 44, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Package size={22} color="#fff" />
+            </div>
+            <h3 style={{ fontWeight: 600 }}>Last Purchase</h3>
+          </div>
+          {dashboardData?.last_purchase ? (
+            <>
+              <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>Order #{dashboardData.last_purchase.order_number}</p>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Rs. {dashboardData.last_purchase.total} - {dashboardData.last_purchase.date}</p>
+              <span style={{ display: "inline-block", padding: "4px 12px", background: "rgba(81,207,102,0.2)", color: "#51cf66", borderRadius: 20, fontSize: 12, marginTop: 8 }}>
+                {dashboardData.last_purchase.status}
+              </span>
+            </>
+          ) : (
+            <p style={{ color: "rgba(255,255,255,0.5)" }}>No purchases yet</p>
+          )}
+        </div>
+
+        <div className="glass-card-strong" style={{ padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 44, height: 44, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Tag size={22} color="#fff" />
+            </div>
+            <h3 style={{ fontWeight: 600 }}>Preferences</h3>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {(dashboardData?.preferences?.categories?.length > 0 ? dashboardData.preferences.categories : ["shirt", "pants"]).map((cat: string) => (
+              <span key={cat} style={{ padding: "6px 14px", background: "rgba(255,255,255,0.08)", borderRadius: 20, fontSize: 13, textTransform: "capitalize" }}>{cat}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <h2 className="heading-sm">Available Offers</h2>
+          <Gift size={22} color="rgba(255,255,255,0.6)" />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          {offers.slice(0, 3).map((offer) => (
+            <div key={offer.id} className="glass-card" style={{ padding: 20, border: "1px solid rgba(255,255,255,0.1)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <Percent size={18} color="#fff" />
+                <span style={{ fontWeight: 600 }}>{offer.bank_name}</span>
+              </div>
+              <p style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{offer.discount_percent}% OFF</p>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{offer.description}</p>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 8 }}>Min order: Rs. {offer.min_order}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <h2 className="heading-sm">Recommended For You</h2>
+          <button onClick={() => setCurrentView("catalog")} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            View All <ChevronRight size={18} />
+          </button>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+          {dashboardData?.recommendations?.products?.slice(0, 4).map((product: Product) => (
+            <div key={product.id} className="glass-card glass-card-hover" style={{ padding: 16 }}>
+              <div style={{ height: 140, background: "rgba(255,255,255,0.05)", borderRadius: 12, marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Package size={40} color="rgba(255,255,255,0.3)" />
+              </div>
+              <h4 style={{ fontWeight: 600, marginBottom: 4, fontSize: 14 }}>{product.title}</h4>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginBottom: 8 }}>{product.category}</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontWeight: 700 }}>Rs. {product.price}</span>
+                <button onClick={() => addToCart(product.id)} className="btn-primary" style={{ padding: "8px 14px", fontSize: 12 }}>
+                  <Plus size={14} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCatalog = () => (
+    <div style={{ padding: 32 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+        <div>
+          <h1 className="heading-lg" style={{ marginBottom: 8 }}>Product Catalog</h1>
+          <p style={{ color: "rgba(255,255,255,0.6)" }}>{filteredProducts.length} products available</p>
+        </div>
+        <div style={{ display: "flex", gap: 12 }}>
+          <div style={{ position: "relative" }}>
+            <Search size={18} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.4)" }} />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ padding: "12px 12px 12px 44px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", width: 280 }}
             />
-            <Sparkles size={16} />
-            <span>AI Active</span>
           </div>
         </div>
-      </header>
+      </div>
 
-      <div style={{ display: "flex", gap: "40px" }}>
-        {/* Products Section */}
-        <div style={{ flex: 1 }}>
-          {/* Section Header */}
-          <div
+      <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "32px",
-              animation: "slideUp 0.6s ease-out 0.1s both",
+              padding: "10px 20px",
+              background: selectedCategory === cat ? "#fff" : "rgba(255,255,255,0.05)",
+              color: selectedCategory === cat ? "#000" : "#fff",
+              border: "none",
+              borderRadius: 20,
+              cursor: "pointer",
+              fontWeight: 500,
+              textTransform: "capitalize",
             }}
           >
-            <div>
-              <h2
-                className="heading-sm"
-                style={{ color: "#FFFFFF", marginBottom: "8px" }}
-              >
-                Featured Collection
-              </h2>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "12px" }}
-              >
-                <span className="body-sm" style={{ color: "#666666" }}>
-                  {filteredProducts.length}{" "}
-                  {filteredProducts.length === 1 ? "item" : "items"}
-                  {searchQuery && ` matching "${searchQuery}"`}
-                </span>
-                {(sortBy !== "default" ||
-                  priceRange !== "all" ||
-                  searchQuery) && (
-                  <button
-                    onClick={clearFilters}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#888888",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                    }}
-                  >
-                    Clear filters
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+        {filteredProducts.map((product) => (
+          <div key={product.id} className="glass-card glass-card-hover" style={{ padding: 20 }}>
+            <div style={{ height: 160, background: "rgba(255,255,255,0.05)", borderRadius: 12, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Package size={48} color="rgba(255,255,255,0.3)" />
+            </div>
+            <span style={{ display: "inline-block", padding: "4px 10px", background: "rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 11, textTransform: "capitalize", marginBottom: 8 }}>{product.category}</span>
+            <h4 style={{ fontWeight: 600, marginBottom: 6 }}>{product.title}</h4>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 12, height: 40, overflow: "hidden" }}>{product.description}</p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 20, fontWeight: 700 }}>Rs. {product.price}</span>
+              <button onClick={() => addToCart(product.id)} className="btn-primary" style={{ padding: "10px 16px" }}>
+                <ShoppingCart size={16} style={{ marginRight: 6 }} /> Add
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderCart = () => (
+    <div style={{ padding: 32, maxWidth: 900 }}>
+      <h1 className="heading-lg" style={{ marginBottom: 32 }}>Shopping Cart</h1>
+
+      {cart.items.length === 0 ? (
+        <div className="glass-card-strong" style={{ padding: 60, textAlign: "center" }}>
+          <ShoppingCart size={60} color="rgba(255,255,255,0.2)" style={{ marginBottom: 20 }} />
+          <h3 style={{ marginBottom: 8 }}>Your cart is empty</h3>
+          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>Add some products to get started</p>
+          <button onClick={() => setCurrentView("catalog")} className="btn-primary">Browse Products</button>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
+            {cart.items.map((item) => (
+              <div key={item.id} className="glass-card" style={{ padding: 20, display: "flex", alignItems: "center", gap: 20 }}>
+                <div style={{ width: 80, height: 80, background: "rgba(255,255,255,0.05)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Package size={32} color="rgba(255,255,255,0.3)" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontWeight: 600, marginBottom: 4 }}>{item.product.title}</h4>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Size: {item.size} | Qty: {item.quantity}</p>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <p style={{ fontWeight: 700, fontSize: 18 }}>Rs. {item.subtotal}</p>
+                  <button onClick={() => removeFromCart(item.id)} style={{ background: "none", border: "none", color: "#ff4444", cursor: "pointer", marginTop: 8 }}>
+                    <Trash2 size={18} />
                   </button>
-                )}
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                onClick={() => setViewMode("grid")}
-                style={{
-                  padding: "10px",
-                  background:
-                    viewMode === "grid"
-                      ? "rgba(255, 255, 255, 0.1)"
-                      : "transparent",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  borderRadius: "10px",
-                  color: viewMode === "grid" ? "#FFFFFF" : "#666666",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <Grid size={18} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                style={{
-                  padding: "10px",
-                  background:
-                    viewMode === "list"
-                      ? "rgba(255, 255, 255, 0.1)"
-                      : "transparent",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  borderRadius: "10px",
-                  color: viewMode === "list" ? "#FFFFFF" : "#666666",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <List size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* Products Grid */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                viewMode === "grid"
-                  ? "repeat(auto-fill, minmax(320px, 1fr))"
-                  : "1fr",
-              gap: "28px",
-            }}
-          >
-            {filteredProducts.length === 0 ? (
-              <div
-                style={{
-                  gridColumn: "1 / -1",
-                  textAlign: "center",
-                  padding: "80px 20px",
-                  color: "#666666",
-                }}
-              >
-                <Search
-                  size={48}
-                  color="#333333"
-                  style={{ marginBottom: "16px" }}
-                />
-                <p style={{ fontSize: "18px", marginBottom: "8px" }}>
-                  No products found
-                </p>
-                <p style={{ fontSize: "14px" }}>
-                  Try adjusting your search or filters
-                </p>
-              </div>
-            ) : (
-              filteredProducts.map((p, idx) => (
-                <div
-                  key={p.pid}
-                  className="glass-card-strong glass-card-hover"
-                  style={{
-                    padding: "0",
-                    cursor: "pointer",
-                    overflow: "hidden",
-                    animation: `scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.08}s both`,
-                  }}
-                >
-                  {/* Product Image */}
-                  <div
-                    style={{
-                      width: "100%",
-                      height: viewMode === "grid" ? "280px" : "200px",
-                      background: "#0A0A0A",
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <img
-                      src={getProductImage(p.title, p.desc)}
-                      alt={p.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        transition:
-                          "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                        filter: "grayscale(20%)",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "scale(1.1)";
-                        e.currentTarget.style.filter = "grayscale(0%)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "scale(1)";
-                        e.currentTarget.style.filter = "grayscale(20%)";
-                      }}
-                    />
-
-                    {/* Favorite Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(p.pid);
-                      }}
-                      style={{
-                        position: "absolute",
-                        top: "16px",
-                        right: "16px",
-                        width: "44px",
-                        height: "44px",
-                        background: "rgba(0, 0, 0, 0.7)",
-                        backdropFilter: "blur(12px)",
-                        border: favorites.has(p.pid)
-                          ? "2px solid #FFFFFF"
-                          : "1px solid rgba(255, 255, 255, 0.2)",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                        zIndex: 2,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "scale(1.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "scale(1)";
-                      }}
-                    >
-                      <Heart
-                        size={20}
-                        color="#FFFFFF"
-                        fill={favorites.has(p.pid) ? "#FFFFFF" : "none"}
-                      />
-                    </button>
-
-                    {/* Trending Badge */}
-                    {idx < 3 && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "16px",
-                          left: "16px",
-                          background: "#FFFFFF",
-                          padding: "8px 14px",
-                          borderRadius: "9999px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          fontSize: "12px",
-                          fontWeight: 700,
-                          color: "#000000",
-                          zIndex: 2,
-                        }}
-                      >
-                        <Zap size={14} fill="#000000" />
-                        <span>HOT</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div style={{ padding: "24px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: "12px",
-                        gap: "12px",
-                      }}
-                    >
-                      <h3
-                        className="body-lg"
-                        style={{
-                          fontWeight: 700,
-                          color: "#FFFFFF",
-                          flex: 1,
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {p.title}
-                      </h3>
-                      <div
-                        style={{
-                          background: "#FFFFFF",
-                          padding: "8px 16px",
-                          borderRadius: "9999px",
-                          fontSize: "16px",
-                          fontWeight: 800,
-                          color: "#000000",
-                          whiteSpace: "nowrap",
-                          letterSpacing: "-0.02em",
-                        }}
-                      >
-                        ₹{p.price}
-                      </div>
-                    </div>
-
-                    <p
-                      className="body-sm"
-                      style={{
-                        color: "#888888",
-                        marginBottom: "20px",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {p.desc}
-                    </p>
-
-                    {/* Rating */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={16}
-                          fill={i < 4 ? "#FFFFFF" : "none"}
-                          color={i < 4 ? "#FFFFFF" : "#333333"}
-                        />
-                      ))}
-                      <span
-                        className="body-xs"
-                        style={{ color: "#666666", marginLeft: "4px" }}
-                      >
-                        4.8 (124)
-                      </span>
-                    </div>
-
-                    {/* Action Button */}
-                    <button
-                      onClick={() => sendToAgent(`add ${p.pid} size M`)}
-                      className="btn-primary"
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "10px",
-                        padding: "16px",
-                      }}
-                    >
-                      <ShoppingCart size={20} strokeWidth={2.5} />
-                      <span>Add to Cart</span>
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* AI Chat Assistant */}
-        <aside
-          className="glass-card-strong"
-          style={{
-            width: "460px",
-            padding: "32px",
-            display: "flex",
-            flexDirection: "column",
-            height: "calc(100vh - 200px)",
-            position: "sticky",
-            top: "32px",
-            animation: "slideUp 0.6s ease-out 0.2s both",
-          }}
-        >
-          {/* Chat Header */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              marginBottom: "28px",
-              paddingBottom: "24px",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-            }}
-          >
-            <div
-              style={{
-                width: "56px",
-                height: "56px",
-                background: "#FFFFFF",
-                borderRadius: "18px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Sparkles size={28} color="#000000" strokeWidth={2.5} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <h3
-                className="body-lg"
-                style={{
-                  fontWeight: 700,
-                  color: "#FFFFFF",
-                  marginBottom: "4px",
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                AI Shopping Assistant
-              </h3>
-              <p
-                className="body-xs"
-                style={{ color: "#666666", fontWeight: 500 }}
-              >
-                Intelligent • Instant • Personalized
-              </p>
-            </div>
-          </div>
-
-          {/* Messages Container */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              marginBottom: "24px",
-              paddingRight: "12px",
-            }}
-          >
-            {messages.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "80px 24px",
-                  animation: "fadeIn 0.6s ease-in",
-                }}
-              >
-                <div
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    background: "rgba(255, 255, 255, 0.05)",
-                    borderRadius: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto 24px",
-                  }}
-                >
-                  <MessageCircle size={36} color="#666666" />
-                </div>
-                <h4
-                  style={{
-                    color: "#FFFFFF",
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    marginBottom: "12px",
-                  }}
-                >
-                  Start a Conversation
-                </h4>
-                <p
-                  style={{
-                    color: "#666666",
-                    fontSize: "14px",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  Ask about products, get recommendations, or add items to your
-                  cart
-                </p>
-              </div>
-            )}
-
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: "flex",
-                  justifyContent:
-                    msg.role === "user" ? "flex-end" : "flex-start",
-                  marginBottom: "16px",
-                  animation: "slideUp 0.3s ease-out",
-                }}
-              >
-                <div
-                  style={{
-                    maxWidth: "85%",
-                    padding: "16px 20px",
-                    borderRadius:
-                      msg.role === "user"
-                        ? "20px 20px 4px 20px"
-                        : "20px 20px 20px 4px",
-                    background:
-                      msg.role === "user"
-                        ? "#FFFFFF"
-                        : "rgba(255, 255, 255, 0.05)",
-                    color: msg.role === "user" ? "#000000" : "#FFFFFF",
-                    fontSize: "15px",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {msg.content}
                 </div>
               </div>
             ))}
-
-            {loading && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-start",
-                  marginBottom: "16px",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "16px 20px",
-                    borderRadius: "20px 20px 20px 4px",
-                    background: "rgba(255, 255, 255, 0.05)",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          background: "#666666",
-                          animation: `pulse 1.4s ease-in-out ${i * 0.16}s infinite`,
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              alignItems: "center",
-              background: "rgba(255, 255, 255, 0.03)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              borderRadius: "16px",
-              padding: "8px 8px 8px 20px",
-            }}
-          >
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask anything..."
-              style={{
-                flex: 1,
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                fontSize: "15px",
-                color: "#FFFFFF",
-              }}
-            />
-            <button
-              onClick={() => sendToAgent(inputValue)}
-              disabled={!inputValue.trim() || loading}
-              style={{
-                width: "48px",
-                height: "48px",
-                background: inputValue.trim()
-                  ? "#FFFFFF"
-                  : "rgba(255, 255, 255, 0.1)",
-                border: "none",
-                borderRadius: "12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: inputValue.trim() ? "pointer" : "not-allowed",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <Send
-                size={20}
-                color={inputValue.trim() ? "#000000" : "#666666"}
-              />
+          <div className="glass-card-strong" style={{ padding: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+              <span style={{ color: "rgba(255,255,255,0.6)" }}>Subtotal</span>
+              <span style={{ fontWeight: 600 }}>Rs. {cart.total}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+              <span style={{ fontWeight: 700, fontSize: 20 }}>Total</span>
+              <span style={{ fontWeight: 700, fontSize: 20 }}>Rs. {cart.total}</span>
+            </div>
+            <button onClick={() => { setCurrentView("checkout"); setCheckoutStep(1); }} className="btn-primary" style={{ width: "100%" }}>
+              Proceed to Checkout
             </button>
           </div>
-        </aside>
+        </>
+      )}
+    </div>
+  );
+
+  const renderCheckout = () => (
+    <div style={{ padding: 32, maxWidth: 700 }}>
+      <h1 className="heading-lg" style={{ marginBottom: 8 }}>Checkout</h1>
+      <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+        {[1, 2, 3, 4, 5].map((step) => (
+          <div key={step} style={{ flex: 1, height: 4, background: step <= checkoutStep ? "#fff" : "rgba(255,255,255,0.1)", borderRadius: 2 }} />
+        ))}
       </div>
+
+      {checkoutStep === 1 && (
+        <div className="glass-card-strong" style={{ padding: 32 }}>
+          <h2 className="heading-sm" style={{ marginBottom: 24 }}>Choose Delivery Option</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <button
+              onClick={() => setOrderType("online")}
+              style={{
+                padding: 24,
+                background: orderType === "online" ? "rgba(255,255,255,0.1)" : "transparent",
+                border: `2px solid ${orderType === "online" ? "#fff" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: 16,
+                cursor: "pointer",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+              }}
+            >
+              <Truck size={28} color="#fff" />
+              <div>
+                <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>Online Delivery</h4>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Get it delivered to your doorstep</p>
+              </div>
+            </button>
+            <button
+              onClick={() => setOrderType("store")}
+              style={{
+                padding: 24,
+                background: orderType === "store" ? "rgba(255,255,255,0.1)" : "transparent",
+                border: `2px solid ${orderType === "store" ? "#fff" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: 16,
+                cursor: "pointer",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+              }}
+            >
+              <MapPin size={28} color="#fff" />
+              <div>
+                <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>Buy from Store</h4>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Pick up from your nearest store</p>
+              </div>
+            </button>
+          </div>
+          <button onClick={() => setCheckoutStep(2)} className="btn-primary" style={{ width: "100%", marginTop: 24 }}>
+            Continue
+          </button>
+        </div>
+      )}
+
+      {checkoutStep === 2 && (
+        <div className="glass-card-strong" style={{ padding: 32 }}>
+          <h2 className="heading-sm" style={{ marginBottom: 24 }}>Apply Bank Offers</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+            {offers.map((offer) => (
+              <button
+                key={offer.id}
+                onClick={() => setSelectedOffer(selectedOffer === offer.id ? null : offer.id)}
+                style={{
+                  padding: 20,
+                  background: selectedOffer === offer.id ? "rgba(81,207,102,0.1)" : "transparent",
+                  border: `2px solid ${selectedOffer === offer.id ? "#51cf66" : "rgba(255,255,255,0.1)"}`,
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>{offer.bank_name} - {offer.discount_percent}% OFF</h4>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{offer.description}</p>
+                </div>
+                {selectedOffer === offer.id && <Check size={22} color="#51cf66" />}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ background: "rgba(255,255,255,0.05)", padding: 20, borderRadius: 12, marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ color: "rgba(255,255,255,0.6)" }}>Cart Total</span>
+              <span>Rs. {cart.total}</span>
+            </div>
+            {selectedOffer && (
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#51cf66" }}>
+                <span>Discount</span>
+                <span>- Rs. {Math.min(cart.total * (offers.find(o => o.id === selectedOffer)?.discount_percent || 0) / 100, offers.find(o => o.id === selectedOffer)?.max_discount || 0).toFixed(0)}</span>
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 18, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <span>Final Total</span>
+              <span>Rs. {(cart.total - (selectedOffer ? Math.min(cart.total * (offers.find(o => o.id === selectedOffer)?.discount_percent || 0) / 100, offers.find(o => o.id === selectedOffer)?.max_discount || 0) : 0)).toFixed(0)}</span>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => setCheckoutStep(1)} className="btn-secondary" style={{ flex: 1 }}>Back</button>
+            <button onClick={() => setCheckoutStep(3)} className="btn-primary" style={{ flex: 2 }}>Continue to Payment</button>
+          </div>
+        </div>
+      )}
+
+      {checkoutStep === 3 && (
+        <div className="glass-card-strong" style={{ padding: 32 }}>
+          <h2 className="heading-sm" style={{ marginBottom: 24 }}>
+            {paymentResult?.payment?.can_retry ? "Payment Failed - Try Again" : "Select Payment Method"}
+          </h2>
+
+          {paymentResult?.payment?.can_retry && (
+            <div style={{ background: "rgba(255,68,68,0.1)", border: "1px solid rgba(255,68,68,0.3)", borderRadius: 12, padding: 16, marginBottom: 24 }}>
+              <p style={{ color: "#ff4444" }}>{paymentResult.payment.message}</p>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 8 }}>Attempt {paymentAttempts} of 2</p>
+            </div>
+          )}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+            <button
+              onClick={() => setPaymentMethod("upi")}
+              style={{
+                padding: 20,
+                background: paymentMethod === "upi" ? "rgba(255,255,255,0.1)" : "transparent",
+                border: `2px solid ${paymentMethod === "upi" ? "#fff" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: 12,
+                cursor: "pointer",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <CreditCard size={24} color="#fff" />
+              <div>
+                <h4 style={{ color: "#fff", fontWeight: 600 }}>UPI Payment</h4>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Pay using any UPI app</p>
+              </div>
+            </button>
+            <button
+              onClick={() => setPaymentMethod("cod")}
+              style={{
+                padding: 20,
+                background: paymentMethod === "cod" ? "rgba(255,255,255,0.1)" : "transparent",
+                border: `2px solid ${paymentMethod === "cod" ? "#fff" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: 12,
+                cursor: "pointer",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <Package size={24} color="#fff" />
+              <div>
+                <h4 style={{ color: "#fff", fontWeight: 600 }}>Cash on Delivery</h4>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Pay when you receive</p>
+              </div>
+            </button>
+          </div>
+
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => setCheckoutStep(2)} className="btn-secondary" style={{ flex: 1 }}>Back</button>
+            <button
+              onClick={paymentResult?.payment?.can_retry ? retryPayment : handleCheckout}
+              className="btn-primary"
+              style={{ flex: 2 }}
+              disabled={loading}
+            >
+              {loading ? "Processing..." : paymentResult?.payment?.can_retry ? "Retry Payment" : "Pay Now"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {checkoutStep === 4 && (
+        <div className="glass-card-strong" style={{ padding: 32 }}>
+          <h2 className="heading-sm" style={{ marginBottom: 8 }}>Select Store Pickup Slot</h2>
+          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>Choose a convenient time to pick up your order</p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+            {storeSlots.map((slot) => (
+              <button
+                key={slot.id}
+                onClick={() => setSelectedSlot(slot.id)}
+                style={{
+                  padding: 16,
+                  background: selectedSlot === slot.id ? "rgba(255,255,255,0.1)" : "transparent",
+                  border: `2px solid ${selectedSlot === slot.id ? "#fff" : "rgba(255,255,255,0.1)"}`,
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 16,
+                }}
+              >
+                <Calendar size={20} color="#fff" />
+                <div>
+                  <p style={{ color: "#fff", fontWeight: 600 }}>{slot.date}</p>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}><Clock size={12} style={{ display: "inline", marginRight: 4 }} />{slot.time}</p>
+                </div>
+                {selectedSlot === slot.id && <Check size={20} color="#fff" style={{ marginLeft: "auto" }} />}
+              </button>
+            ))}
+          </div>
+
+          <button onClick={confirmSlot} className="btn-primary" style={{ width: "100%" }} disabled={!selectedSlot}>
+            Confirm Slot
+          </button>
+        </div>
+      )}
+
+      {checkoutStep === 5 && (
+        <div className="glass-card-strong" style={{ padding: 40, textAlign: "center" }}>
+          <div style={{ width: 80, height: 80, background: "rgba(81,207,102,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+            <Check size={40} color="#51cf66" />
+          </div>
+          <h2 className="heading-md" style={{ marginBottom: 12 }}>Order Confirmed!</h2>
+          <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 24 }}>
+            {orderResult ? `Order #${orderResult.order_number}` : "Your order has been placed successfully"}
+          </p>
+          {aiMessage && (
+            <div style={{ background: "rgba(255,255,255,0.05)", padding: 16, borderRadius: 12, marginBottom: 24 }}>
+              <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic" }}>{aiMessage}</p>
+            </div>
+          )}
+          {paymentResult?.delivery?.estimated_date && (
+            <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>
+              <Truck size={16} style={{ display: "inline", marginRight: 8 }} />
+              Expected delivery: {paymentResult.delivery.estimated_date}
+            </p>
+          )}
+          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+            <button onClick={() => setCurrentView("orders")} className="btn-secondary">View Orders</button>
+            <button onClick={() => { setCurrentView("catalog"); setCheckoutStep(1); }} className="btn-primary">Continue Shopping</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderOrders = () => (
+    <div style={{ padding: 32 }}>
+      <h1 className="heading-lg" style={{ marginBottom: 32 }}>Order History</h1>
+
+      {orders.length === 0 ? (
+        <div className="glass-card-strong" style={{ padding: 60, textAlign: "center" }}>
+          <Package size={60} color="rgba(255,255,255,0.2)" style={{ marginBottom: 20 }} />
+          <h3 style={{ marginBottom: 8 }}>No orders yet</h3>
+          <p style={{ color: "rgba(255,255,255,0.5)" }}>Start shopping to see your orders here</p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {orders.map((order) => (
+            <div key={order.id} className="glass-card" style={{ padding: 24 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                <div>
+                  <h4 style={{ fontWeight: 600, marginBottom: 4 }}>Order #{order.order_number}</h4>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>{order.date}</p>
+                </div>
+                <span style={{
+                  padding: "6px 14px",
+                  background: order.status === "delivered" ? "rgba(81,207,102,0.2)" : "rgba(255,255,255,0.1)",
+                  color: order.status === "delivered" ? "#51cf66" : "#fff",
+                  borderRadius: 20,
+                  fontSize: 13,
+                  textTransform: "capitalize"
+                }}>
+                  {order.status}
+                </span>
+              </div>
+              <p style={{ fontWeight: 600, marginBottom: 16 }}>Rs. {order.total}</p>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button onClick={() => trackOrder(order.id)} className="btn-secondary" style={{ padding: "10px 16px", fontSize: 13 }}>
+                  <Truck size={14} style={{ marginRight: 6 }} /> Track
+                </button>
+                <button onClick={() => setFeedbackOrder(order.id)} className="btn-secondary" style={{ padding: "10px 16px", fontSize: 13 }}>
+                  <Star size={14} style={{ marginRight: 6 }} /> Feedback
+                </button>
+                <button onClick={() => setReturnOrder(order.id)} className="btn-secondary" style={{ padding: "10px 16px", fontSize: 13 }}>
+                  <RefreshCw size={14} style={{ marginRight: 6 }} /> Return
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {trackingData && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div className="glass-card-strong" style={{ padding: 32, maxWidth: 500, width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h3 className="heading-sm">Order Tracking</h3>
+              <button onClick={() => setTrackingData(null)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={24} /></button>
+            </div>
+            <p style={{ marginBottom: 20 }}>Order #{trackingData.order_number}</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {trackingData.timeline?.map((step: any, i: number) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: step.completed ? "#51cf66" : "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {step.completed && <Check size={16} color="#fff" />}
+                  </div>
+                  <div>
+                    <p style={{ fontWeight: 500 }}>{step.status}</p>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{step.date}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {feedbackOrder && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div className="glass-card-strong" style={{ padding: 32, maxWidth: 450, width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h3 className="heading-sm">Leave Feedback</h3>
+              <button onClick={() => setFeedbackOrder(null)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={24} /></button>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button key={star} onClick={() => setFeedbackRating(star)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+                  <Star size={28} fill={star <= feedbackRating ? "#ffd43b" : "transparent"} color={star <= feedbackRating ? "#ffd43b" : "rgba(255,255,255,0.3)"} />
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={feedbackComment}
+              onChange={(e) => setFeedbackComment(e.target.value)}
+              placeholder="Share your experience..."
+              style={{ width: "100%", height: 120, padding: 16, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", resize: "none", marginBottom: 20 }}
+            />
+            <button onClick={submitFeedback} className="btn-primary" style={{ width: "100%" }}>Submit Feedback</button>
+          </div>
+        </div>
+      )}
+
+      {returnOrder && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div className="glass-card-strong" style={{ padding: 32, maxWidth: 450, width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h3 className="heading-sm">Request Return</h3>
+              <button onClick={() => setReturnOrder(null)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={24} /></button>
+            </div>
+            <textarea
+              value={returnReason}
+              onChange={(e) => setReturnReason(e.target.value)}
+              placeholder="Reason for return..."
+              style={{ width: "100%", height: 120, padding: 16, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", resize: "none", marginBottom: 20 }}
+            />
+            <button onClick={submitReturn} className="btn-primary" style={{ width: "100%" }}>Submit Request</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSupport = () => (
+    <div style={{ padding: 32 }}>
+      <h1 className="heading-lg" style={{ marginBottom: 8 }}>Customer Support</h1>
+      <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>How can we help you today?</p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+        <div className="glass-card glass-card-hover" style={{ padding: 24, cursor: "pointer" }} onClick={() => setCurrentView("orders")}>
+          <Truck size={32} color="#fff" style={{ marginBottom: 16 }} />
+          <h3 style={{ fontWeight: 600, marginBottom: 8 }}>Track Shipment</h3>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Check the status of your orders</p>
+        </div>
+        <div className="glass-card glass-card-hover" style={{ padding: 24, cursor: "pointer" }}>
+          <RefreshCw size={32} color="#fff" style={{ marginBottom: 16 }} />
+          <h3 style={{ fontWeight: 600, marginBottom: 8 }}>Returns & Exchange</h3>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Initiate return or exchange requests</p>
+        </div>
+        <div className="glass-card glass-card-hover" style={{ padding: 24, cursor: "pointer" }}>
+          <MessageSquare size={32} color="#fff" style={{ marginBottom: 16 }} />
+          <h3 style={{ fontWeight: 600, marginBottom: 8 }}>Give Feedback</h3>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Share your shopping experience</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      {renderSidebar()}
+      <main style={{ flex: 1, overflowY: "auto", maxHeight: "100vh" }}>
+        {currentView === "dashboard" && renderDashboard()}
+        {currentView === "catalog" && renderCatalog()}
+        {currentView === "cart" && renderCart()}
+        {currentView === "checkout" && renderCheckout()}
+        {currentView === "orders" && renderOrders()}
+        {currentView === "support" && renderSupport()}
+      </main>
     </div>
   );
 }
