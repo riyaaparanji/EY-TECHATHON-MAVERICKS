@@ -1,9 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import {
-  ShoppingCart, User, Package, Tag, CreditCard, Truck, MessageSquare,
-  LogOut, Plus, Minus, Trash2, Check, X, RefreshCw, Star, MapPin,
-  Calendar, Clock, ChevronRight, Gift, Percent, Search, Filter
+  ShoppingCart,
+  User,
+  Package,
+  Tag,
+  CreditCard,
+  Truck,
+  MessageSquare,
+  LogOut,
+  Plus,
+  Minus,
+  Trash2,
+  Check,
+  X,
+  RefreshCw,
+  Star,
+  MapPin,
+  Calendar,
+  Clock,
+  ChevronRight,
+  Gift,
+  Percent,
+  Search,
+  Filter,
 } from "lucide-react";
 
 interface Product {
@@ -48,7 +68,13 @@ interface StoreSlot {
   store: string;
 }
 
-type ViewType = "dashboard" | "catalog" | "cart" | "checkout" | "orders" | "support";
+type ViewType =
+  | "dashboard"
+  | "catalog"
+  | "cart"
+  | "checkout"
+  | "orders"
+  | "support";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -57,7 +83,10 @@ export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<{ items: CartItem[]; total: number }>({ items: [], total: 0 });
+  const [cart, setCart] = useState<{ items: CartItem[]; total: number }>({
+    items: [],
+    total: 0,
+  });
   const [offers, setOffers] = useState<Offer[]>([]);
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +109,15 @@ export default function Dashboard() {
   const [returnReason, setReturnReason] = useState("");
   const [trackingData, setTrackingData] = useState<any>(null);
 
-  const categories = ["all", "shirt", "pants", "belt", "ethnic", "innerwear", "athleisure"];
+  const categories = [
+    "all",
+    "shirt",
+    "pants",
+    "belt",
+    "ethnic",
+    "innerwear",
+    "athleisure",
+  ];
 
   const getToken = () => localStorage.getItem("token");
 
@@ -114,7 +151,7 @@ export default function Dashboard() {
       filtered = filtered.filter(
         (p) =>
           p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description.toLowerCase().includes(searchQuery.toLowerCase())
+          p.description.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
     setFilteredProducts(filtered);
@@ -122,13 +159,14 @@ export default function Dashboard() {
 
   const loadInitialData = async () => {
     try {
-      const [dashRes, productsRes, cartRes, offersRes, ordersRes] = await Promise.all([
-        authFetch("/api/dashboard"),
-        fetch("/api/products"),
-        authFetch("/api/cart"),
-        fetch("/api/agents/offers"),
-        authFetch("/api/orders"),
-      ]);
+      const [dashRes, productsRes, cartRes, offersRes, ordersRes] =
+        await Promise.all([
+          authFetch("/api/dashboard"),
+          fetch("/api/products"),
+          authFetch("/api/cart"),
+          fetch("/api/agents/offers"),
+          authFetch("/api/orders"),
+        ]);
 
       if (dashRes.ok) {
         const data = await dashRes.json();
@@ -234,7 +272,10 @@ export default function Dashboard() {
     if (!selectedSlot) return;
     const res = await authFetch("/api/checkout/confirm-slot", {
       method: "POST",
-      body: JSON.stringify({ order_id: orderResult?.id, slot_id: selectedSlot }),
+      body: JSON.stringify({
+        order_id: orderResult?.id,
+        slot_id: selectedSlot,
+      }),
     });
     if (res.ok) {
       setCheckoutStep(5);
@@ -284,9 +325,24 @@ export default function Dashboard() {
 
   if (loading && !user) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div style={{ textAlign: "center" }}>
-          <div className="skeleton" style={{ width: 60, height: 60, borderRadius: "50%", margin: "0 auto 20px" }} />
+          <div
+            className="skeleton"
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: "50%",
+              margin: "0 auto 20px",
+            }}
+          />
           <p style={{ color: "rgba(255,255,255,0.6)" }}>Loading...</p>
         </div>
       </div>
@@ -294,14 +350,43 @@ export default function Dashboard() {
   }
 
   const renderSidebar = () => (
-    <aside style={{ width: 280, background: "rgba(255,255,255,0.02)", borderRight: "1px solid rgba(255,255,255,0.06)", padding: "24px", display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 40 }}>
-        <div style={{ width: 50, height: 50, background: "#fff", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
+    <aside
+      style={{
+        width: 280,
+        background: "rgba(255,255,255,0.02)",
+        borderRight: "1px solid rgba(255,255,255,0.06)",
+        padding: "24px",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 40,
+        }}
+      >
+        <div
+          style={{
+            width: 50,
+            height: 50,
+            background: "#fff",
+            borderRadius: 14,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 24,
+          }}
+        >
           🛍️
         </div>
         <div>
           <h2 style={{ fontSize: 18, fontWeight: 700 }}>Shopping</h2>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>AI Assistant</p>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
+            AI Assistant
+          </p>
         </div>
       </div>
 
@@ -309,7 +394,11 @@ export default function Dashboard() {
         {[
           { id: "dashboard", icon: User, label: "Dashboard" },
           { id: "catalog", icon: Package, label: "Products" },
-          { id: "cart", icon: ShoppingCart, label: `Cart (${cart.items.length})` },
+          {
+            id: "cart",
+            icon: ShoppingCart,
+            label: `Cart (${cart.items.length})`,
+          },
           { id: "orders", icon: Truck, label: "Orders" },
           { id: "support", icon: MessageSquare, label: "Support" },
         ].map((item) => (
@@ -325,7 +414,10 @@ export default function Dashboard() {
               alignItems: "center",
               gap: 12,
               padding: "14px 16px",
-              background: currentView === item.id ? "rgba(255,255,255,0.08)" : "transparent",
+              background:
+                currentView === item.id
+                  ? "rgba(255,255,255,0.08)"
+                  : "transparent",
               border: "none",
               borderRadius: 12,
               color: currentView === item.id ? "#fff" : "rgba(255,255,255,0.6)",
@@ -362,36 +454,109 @@ export default function Dashboard() {
 
   const renderDashboard = () => (
     <div style={{ padding: 32 }}>
-      <h1 className="heading-lg" style={{ marginBottom: 8 }}>Welcome, {user?.full_name}!</h1>
-      <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>Here's your shopping overview</p>
+      <h1 className="heading-lg" style={{ marginBottom: 8 }}>
+        Welcome, {user?.full_name}!
+      </h1>
+      <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>
+        Here's your shopping overview
+      </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, marginBottom: 40 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 24,
+          marginBottom: 40,
+        }}
+      >
         <div className="glass-card-strong" style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 44, height: 44, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                background: "rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <User size={22} color="#fff" />
             </div>
             <h3 style={{ fontWeight: 600 }}>Profile</h3>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>{user?.email}</p>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}><MapPin size={14} style={{ display: "inline", marginRight: 4 }} />{user?.city}</p>
+          <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>
+            {user?.email}
+          </p>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+            <MapPin size={14} style={{ display: "inline", marginRight: 4 }} />
+            {user?.city}
+          </p>
           {dashboardData?.profile?.nearest_store && (
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 4 }}>Store: {dashboardData.profile.nearest_store.name}</p>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.5)",
+                fontSize: 14,
+                marginTop: 4,
+              }}
+            >
+              Store: {dashboardData.profile.nearest_store.name}
+            </p>
           )}
         </div>
 
         <div className="glass-card-strong" style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 44, height: 44, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                background: "rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Package size={22} color="#fff" />
             </div>
             <h3 style={{ fontWeight: 600 }}>Last Purchase</h3>
           </div>
           {dashboardData?.last_purchase ? (
             <>
-              <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>Order #{dashboardData.last_purchase.order_number}</p>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Rs. {dashboardData.last_purchase.total} - {dashboardData.last_purchase.date}</p>
-              <span style={{ display: "inline-block", padding: "4px 12px", background: "rgba(81,207,102,0.2)", color: "#51cf66", borderRadius: 20, fontSize: 12, marginTop: 8 }}>
+              <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>
+                Order #{dashboardData.last_purchase.order_number}
+              </p>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+                Rs. {dashboardData.last_purchase.total} -{" "}
+                {dashboardData.last_purchase.date}
+              </p>
+              <span
+                style={{
+                  display: "inline-block",
+                  padding: "4px 12px",
+                  background: "rgba(81,207,102,0.2)",
+                  color: "#51cf66",
+                  borderRadius: 20,
+                  fontSize: 12,
+                  marginTop: 8,
+                }}
+              >
                 {dashboardData.last_purchase.status}
               </span>
             </>
@@ -401,63 +566,190 @@ export default function Dashboard() {
         </div>
 
         <div className="glass-card-strong" style={{ padding: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 44, height: 44, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                background: "rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Tag size={22} color="#fff" />
             </div>
             <h3 style={{ fontWeight: 600 }}>Preferences</h3>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {(dashboardData?.preferences?.categories?.length > 0 ? dashboardData.preferences.categories : ["shirt", "pants"]).map((cat: string) => (
-              <span key={cat} style={{ padding: "6px 14px", background: "rgba(255,255,255,0.08)", borderRadius: 20, fontSize: 13, textTransform: "capitalize" }}>{cat}</span>
+            {(dashboardData?.preferences?.categories?.length > 0
+              ? dashboardData.preferences.categories
+              : ["shirt", "pants"]
+            ).map((cat: string) => (
+              <span
+                key={cat}
+                style={{
+                  padding: "6px 14px",
+                  background: "rgba(255,255,255,0.08)",
+                  borderRadius: 20,
+                  fontSize: 13,
+                  textTransform: "capitalize",
+                }}
+              >
+                {cat}
+              </span>
             ))}
           </div>
         </div>
       </div>
 
       <div style={{ marginBottom: 40 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
           <h2 className="heading-sm">Available Offers</h2>
           <Gift size={22} color="rgba(255,255,255,0.6)" />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 16,
+          }}
+        >
           {offers.slice(0, 3).map((offer) => (
-            <div key={offer.id} className="glass-card" style={{ padding: 20, border: "1px solid rgba(255,255,255,0.1)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <div
+              key={offer.id}
+              className="glass-card"
+              style={{ padding: 20, border: "1px solid rgba(255,255,255,0.1)" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 12,
+                }}
+              >
                 <Percent size={18} color="#fff" />
                 <span style={{ fontWeight: 600 }}>{offer.bank_name}</span>
               </div>
-              <p style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{offer.discount_percent}% OFF</p>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{offer.description}</p>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 8 }}>Min order: Rs. {offer.min_order}</p>
+              <p style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>
+                {offer.discount_percent}% OFF
+              </p>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+                {offer.description}
+              </p>
+              <p
+                style={{
+                  color: "rgba(255,255,255,0.4)",
+                  fontSize: 12,
+                  marginTop: 8,
+                }}
+              >
+                Min order: Rs. {offer.min_order}
+              </p>
             </div>
           ))}
         </div>
       </div>
 
       <div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
           <h2 className="heading-sm">Recommended For You</h2>
-          <button onClick={() => setCurrentView("catalog")} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+          <button
+            onClick={() => setCurrentView("catalog")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#fff",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
             View All <ChevronRight size={18} />
           </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
-          {dashboardData?.recommendations?.products?.slice(0, 4).map((product: Product) => (
-            <div key={product.id} className="glass-card glass-card-hover" style={{ padding: 16 }}>
-              <div style={{ height: 140, background: "rgba(255,255,255,0.05)", borderRadius: 12, marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Package size={40} color="rgba(255,255,255,0.3)" />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 16,
+          }}
+        >
+          {dashboardData?.recommendations?.products
+            ?.slice(0, 4)
+            .map((product: Product) => (
+              <div
+                key={product.id}
+                className="glass-card glass-card-hover"
+                style={{ padding: 16 }}
+              >
+                <div
+                  style={{
+                    height: 140,
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: 12,
+                    marginBottom: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Package size={40} color="rgba(255,255,255,0.3)" />
+                </div>
+                <h4 style={{ fontWeight: 600, marginBottom: 4, fontSize: 14 }}>
+                  {product.title}
+                </h4>
+                <p
+                  style={{
+                    color: "rgba(255,255,255,0.5)",
+                    fontSize: 12,
+                    marginBottom: 8,
+                  }}
+                >
+                  {product.category}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ fontWeight: 700 }}>Rs. {product.price}</span>
+                  <button
+                    onClick={() => addToCart(product.id)}
+                    className="btn-primary"
+                    style={{ padding: "8px 14px", fontSize: 12 }}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
               </div>
-              <h4 style={{ fontWeight: 600, marginBottom: 4, fontSize: 14 }}>{product.title}</h4>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginBottom: 8 }}>{product.category}</p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: 700 }}>Rs. {product.price}</span>
-                <button onClick={() => addToCart(product.id)} className="btn-primary" style={{ padding: "8px 14px", fontSize: 12 }}>
-                  <Plus size={14} />
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
@@ -465,33 +757,63 @@ export default function Dashboard() {
 
   const renderCatalog = () => (
     <div style={{ padding: 32 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 32,
+        }}
+      >
         <div>
-          <h1 className="heading-lg" style={{ marginBottom: 8 }}>Product Catalog</h1>
-          <p style={{ color: "rgba(255,255,255,0.6)" }}>{filteredProducts.length} products available</p>
+          <h1 className="heading-lg" style={{ marginBottom: 8 }}>
+            Product Catalog
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.6)" }}>
+            {filteredProducts.length} products available
+          </p>
         </div>
         <div style={{ display: "flex", gap: 12 }}>
           <div style={{ position: "relative" }}>
-            <Search size={18} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.4)" }} />
+            <Search
+              size={18}
+              style={{
+                position: "absolute",
+                left: 14,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "rgba(255,255,255,0.4)",
+              }}
+            />
             <input
               type="text"
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ padding: "12px 12px 12px 44px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", width: 280 }}
+              style={{
+                padding: "12px 12px 12px 44px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                color: "#fff",
+                width: 280,
+              }}
             />
           </div>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+      <div
+        style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}
+      >
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
             style={{
               padding: "10px 20px",
-              background: selectedCategory === cat ? "#fff" : "rgba(255,255,255,0.05)",
+              background:
+                selectedCategory === cat ? "#fff" : "rgba(255,255,255,0.05)",
               color: selectedCategory === cat ? "#000" : "#fff",
               border: "none",
               borderRadius: 20,
@@ -505,18 +827,74 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 20,
+        }}
+      >
         {filteredProducts.map((product) => (
-          <div key={product.id} className="glass-card glass-card-hover" style={{ padding: 20 }}>
-            <div style={{ height: 160, background: "rgba(255,255,255,0.05)", borderRadius: 12, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div
+            key={product.id}
+            className="glass-card glass-card-hover"
+            style={{ padding: 20 }}
+          >
+            <div
+              style={{
+                height: 160,
+                background: "rgba(255,255,255,0.05)",
+                borderRadius: 12,
+                marginBottom: 16,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Package size={48} color="rgba(255,255,255,0.3)" />
             </div>
-            <span style={{ display: "inline-block", padding: "4px 10px", background: "rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 11, textTransform: "capitalize", marginBottom: 8 }}>{product.category}</span>
-            <h4 style={{ fontWeight: 600, marginBottom: 6 }}>{product.title}</h4>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 12, height: 40, overflow: "hidden" }}>{product.description}</p>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 20, fontWeight: 700 }}>Rs. {product.price}</span>
-              <button onClick={() => addToCart(product.id)} className="btn-primary" style={{ padding: "10px 16px" }}>
+            <span
+              style={{
+                display: "inline-block",
+                padding: "4px 10px",
+                background: "rgba(255,255,255,0.08)",
+                borderRadius: 12,
+                fontSize: 11,
+                textTransform: "capitalize",
+                marginBottom: 8,
+              }}
+            >
+              {product.category}
+            </span>
+            <h4 style={{ fontWeight: 600, marginBottom: 6 }}>
+              {product.title}
+            </h4>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.5)",
+                fontSize: 13,
+                marginBottom: 12,
+                height: 40,
+                overflow: "hidden",
+              }}
+            >
+              {product.description}
+            </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span style={{ fontSize: 20, fontWeight: 700 }}>
+                Rs. {product.price}
+              </span>
+              <button
+                onClick={() => addToCart(product.id)}
+                className="btn-primary"
+                style={{ padding: "10px 16px" }}
+              >
                 <ShoppingCart size={16} style={{ marginRight: 6 }} /> Add
               </button>
             </div>
@@ -528,30 +906,87 @@ export default function Dashboard() {
 
   const renderCart = () => (
     <div style={{ padding: 32, maxWidth: 900 }}>
-      <h1 className="heading-lg" style={{ marginBottom: 32 }}>Shopping Cart</h1>
+      <h1 className="heading-lg" style={{ marginBottom: 32 }}>
+        Shopping Cart
+      </h1>
 
       {cart.items.length === 0 ? (
-        <div className="glass-card-strong" style={{ padding: 60, textAlign: "center" }}>
-          <ShoppingCart size={60} color="rgba(255,255,255,0.2)" style={{ marginBottom: 20 }} />
+        <div
+          className="glass-card-strong"
+          style={{ padding: 60, textAlign: "center" }}
+        >
+          <ShoppingCart
+            size={60}
+            color="rgba(255,255,255,0.2)"
+            style={{ marginBottom: 20 }}
+          />
           <h3 style={{ marginBottom: 8 }}>Your cart is empty</h3>
-          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>Add some products to get started</p>
-          <button onClick={() => setCurrentView("catalog")} className="btn-primary">Browse Products</button>
+          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>
+            Add some products to get started
+          </p>
+          <button
+            onClick={() => setCurrentView("catalog")}
+            className="btn-primary"
+          >
+            Browse Products
+          </button>
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              marginBottom: 32,
+            }}
+          >
             {cart.items.map((item) => (
-              <div key={item.id} className="glass-card" style={{ padding: 20, display: "flex", alignItems: "center", gap: 20 }}>
-                <div style={{ width: 80, height: 80, background: "rgba(255,255,255,0.05)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div
+                key={item.id}
+                className="glass-card"
+                style={{
+                  padding: 20,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 20,
+                }}
+              >
+                <div
+                  style={{
+                    width: 80,
+                    height: 80,
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <Package size={32} color="rgba(255,255,255,0.3)" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ fontWeight: 600, marginBottom: 4 }}>{item.product.title}</h4>
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Size: {item.size} | Qty: {item.quantity}</p>
+                  <h4 style={{ fontWeight: 600, marginBottom: 4 }}>
+                    {item.product.title}
+                  </h4>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+                    Size: {item.size} | Qty: {item.quantity}
+                  </p>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <p style={{ fontWeight: 700, fontSize: 18 }}>Rs. {item.subtotal}</p>
-                  <button onClick={() => removeFromCart(item.id)} style={{ background: "none", border: "none", color: "#ff4444", cursor: "pointer", marginTop: 8 }}>
+                  <p style={{ fontWeight: 700, fontSize: 18 }}>
+                    Rs. {item.subtotal}
+                  </p>
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#ff4444",
+                      cursor: "pointer",
+                      marginTop: 8,
+                    }}
+                  >
                     <Trash2 size={18} />
                   </button>
                 </div>
@@ -560,15 +995,36 @@ export default function Dashboard() {
           </div>
 
           <div className="glass-card-strong" style={{ padding: 24 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 16,
+              }}
+            >
               <span style={{ color: "rgba(255,255,255,0.6)" }}>Subtotal</span>
               <span style={{ fontWeight: 600 }}>Rs. {cart.total}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 24,
+              }}
+            >
               <span style={{ fontWeight: 700, fontSize: 20 }}>Total</span>
-              <span style={{ fontWeight: 700, fontSize: 20 }}>Rs. {cart.total}</span>
+              <span style={{ fontWeight: 700, fontSize: 20 }}>
+                Rs. {cart.total}
+              </span>
             </div>
-            <button onClick={() => { setCurrentView("checkout"); setCheckoutStep(1); }} className="btn-primary" style={{ width: "100%" }}>
+            <button
+              onClick={() => {
+                setCurrentView("checkout");
+                setCheckoutStep(1);
+              }}
+              className="btn-primary"
+              style={{ width: "100%" }}
+            >
               Proceed to Checkout
             </button>
           </div>
@@ -579,22 +1035,38 @@ export default function Dashboard() {
 
   const renderCheckout = () => (
     <div style={{ padding: 32, maxWidth: 700 }}>
-      <h1 className="heading-lg" style={{ marginBottom: 8 }}>Checkout</h1>
+      <h1 className="heading-lg" style={{ marginBottom: 8 }}>
+        Checkout
+      </h1>
       <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
         {[1, 2, 3, 4, 5].map((step) => (
-          <div key={step} style={{ flex: 1, height: 4, background: step <= checkoutStep ? "#fff" : "rgba(255,255,255,0.1)", borderRadius: 2 }} />
+          <div
+            key={step}
+            style={{
+              flex: 1,
+              height: 4,
+              background:
+                step <= checkoutStep ? "#fff" : "rgba(255,255,255,0.1)",
+              borderRadius: 2,
+            }}
+          />
         ))}
       </div>
 
       {checkoutStep === 1 && (
         <div className="glass-card-strong" style={{ padding: 32 }}>
-          <h2 className="heading-sm" style={{ marginBottom: 24 }}>Choose Delivery Option</h2>
+          <h2 className="heading-sm" style={{ marginBottom: 24 }}>
+            Choose Delivery Option
+          </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <button
               onClick={() => setOrderType("online")}
               style={{
                 padding: 24,
-                background: orderType === "online" ? "rgba(255,255,255,0.1)" : "transparent",
+                background:
+                  orderType === "online"
+                    ? "rgba(255,255,255,0.1)"
+                    : "transparent",
                 border: `2px solid ${orderType === "online" ? "#fff" : "rgba(255,255,255,0.1)"}`,
                 borderRadius: 16,
                 cursor: "pointer",
@@ -606,15 +1078,22 @@ export default function Dashboard() {
             >
               <Truck size={28} color="#fff" />
               <div>
-                <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>Online Delivery</h4>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Get it delivered to your doorstep</p>
+                <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>
+                  Online Delivery
+                </h4>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+                  Get it delivered to your doorstep
+                </p>
               </div>
             </button>
             <button
               onClick={() => setOrderType("store")}
               style={{
                 padding: 24,
-                background: orderType === "store" ? "rgba(255,255,255,0.1)" : "transparent",
+                background:
+                  orderType === "store"
+                    ? "rgba(255,255,255,0.1)"
+                    : "transparent",
                 border: `2px solid ${orderType === "store" ? "#fff" : "rgba(255,255,255,0.1)"}`,
                 borderRadius: 16,
                 cursor: "pointer",
@@ -626,12 +1105,20 @@ export default function Dashboard() {
             >
               <MapPin size={28} color="#fff" />
               <div>
-                <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>Buy from Store</h4>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Pick up from your nearest store</p>
+                <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>
+                  Buy from Store
+                </h4>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+                  Pick up from your nearest store
+                </p>
               </div>
             </button>
           </div>
-          <button onClick={() => setCheckoutStep(2)} className="btn-primary" style={{ width: "100%", marginTop: 24 }}>
+          <button
+            onClick={() => setCheckoutStep(2)}
+            className="btn-primary"
+            style={{ width: "100%", marginTop: 24 }}
+          >
             Continue
           </button>
         </div>
@@ -639,15 +1126,29 @@ export default function Dashboard() {
 
       {checkoutStep === 2 && (
         <div className="glass-card-strong" style={{ padding: 32 }}>
-          <h2 className="heading-sm" style={{ marginBottom: 24 }}>Apply Bank Offers</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+          <h2 className="heading-sm" style={{ marginBottom: 24 }}>
+            Apply Bank Offers
+          </h2>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              marginBottom: 24,
+            }}
+          >
             {offers.map((offer) => (
               <button
                 key={offer.id}
-                onClick={() => setSelectedOffer(selectedOffer === offer.id ? null : offer.id)}
+                onClick={() =>
+                  setSelectedOffer(selectedOffer === offer.id ? null : offer.id)
+                }
                 style={{
                   padding: 20,
-                  background: selectedOffer === offer.id ? "rgba(81,207,102,0.1)" : "transparent",
+                  background:
+                    selectedOffer === offer.id
+                      ? "rgba(81,207,102,0.1)"
+                      : "transparent",
                   border: `2px solid ${selectedOffer === offer.id ? "#51cf66" : "rgba(255,255,255,0.1)"}`,
                   borderRadius: 12,
                   cursor: "pointer",
@@ -658,34 +1159,108 @@ export default function Dashboard() {
                 }}
               >
                 <div>
-                  <h4 style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}>{offer.bank_name} - {offer.discount_percent}% OFF</h4>
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{offer.description}</p>
+                  <h4
+                    style={{ color: "#fff", fontWeight: 600, marginBottom: 4 }}
+                  >
+                    {offer.bank_name} - {offer.discount_percent}% OFF
+                  </h4>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+                    {offer.description}
+                  </p>
                 </div>
-                {selectedOffer === offer.id && <Check size={22} color="#51cf66" />}
+                {selectedOffer === offer.id && (
+                  <Check size={22} color="#51cf66" />
+                )}
               </button>
             ))}
           </div>
 
-          <div style={{ background: "rgba(255,255,255,0.05)", padding: 20, borderRadius: 12, marginBottom: 24 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              padding: 20,
+              borderRadius: 12,
+              marginBottom: 24,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 8,
+              }}
+            >
               <span style={{ color: "rgba(255,255,255,0.6)" }}>Cart Total</span>
               <span>Rs. {cart.total}</span>
             </div>
             {selectedOffer && (
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#51cf66" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                  color: "#51cf66",
+                }}
+              >
                 <span>Discount</span>
-                <span>- Rs. {Math.min(cart.total * (offers.find(o => o.id === selectedOffer)?.discount_percent || 0) / 100, offers.find(o => o.id === selectedOffer)?.max_discount || 0).toFixed(0)}</span>
+                <span>
+                  - Rs.{" "}
+                  {Math.min(
+                    (cart.total *
+                      (offers.find((o) => o.id === selectedOffer)
+                        ?.discount_percent || 0)) /
+                      100,
+                    offers.find((o) => o.id === selectedOffer)?.max_discount ||
+                      0,
+                  ).toFixed(0)}
+                </span>
               </div>
             )}
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 18, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontWeight: 700,
+                fontSize: 18,
+                paddingTop: 12,
+                borderTop: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
               <span>Final Total</span>
-              <span>Rs. {(cart.total - (selectedOffer ? Math.min(cart.total * (offers.find(o => o.id === selectedOffer)?.discount_percent || 0) / 100, offers.find(o => o.id === selectedOffer)?.max_discount || 0) : 0)).toFixed(0)}</span>
+              <span>
+                Rs.{" "}
+                {(
+                  cart.total -
+                  (selectedOffer
+                    ? Math.min(
+                        (cart.total *
+                          (offers.find((o) => o.id === selectedOffer)
+                            ?.discount_percent || 0)) /
+                          100,
+                        offers.find((o) => o.id === selectedOffer)
+                          ?.max_discount || 0,
+                      )
+                    : 0)
+                ).toFixed(0)}
+              </span>
             </div>
           </div>
 
           <div style={{ display: "flex", gap: 12 }}>
-            <button onClick={() => setCheckoutStep(1)} className="btn-secondary" style={{ flex: 1 }}>Back</button>
-            <button onClick={() => setCheckoutStep(3)} className="btn-primary" style={{ flex: 2 }}>Continue to Payment</button>
+            <button
+              onClick={() => setCheckoutStep(1)}
+              className="btn-secondary"
+              style={{ flex: 1 }}
+            >
+              Back
+            </button>
+            <button
+              onClick={() => setCheckoutStep(3)}
+              className="btn-primary"
+              style={{ flex: 2 }}
+            >
+              Continue to Payment
+            </button>
           </div>
         </div>
       )}
@@ -693,22 +1268,52 @@ export default function Dashboard() {
       {checkoutStep === 3 && (
         <div className="glass-card-strong" style={{ padding: 32 }}>
           <h2 className="heading-sm" style={{ marginBottom: 24 }}>
-            {paymentResult?.payment?.can_retry ? "Payment Failed - Try Again" : "Select Payment Method"}
+            {paymentResult?.payment?.can_retry
+              ? "Payment Failed - Try Again"
+              : "Select Payment Method"}
           </h2>
 
           {paymentResult?.payment?.can_retry && (
-            <div style={{ background: "rgba(255,68,68,0.1)", border: "1px solid rgba(255,68,68,0.3)", borderRadius: 12, padding: 16, marginBottom: 24 }}>
-              <p style={{ color: "#ff4444" }}>{paymentResult.payment.message}</p>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 8 }}>Attempt {paymentAttempts} of 2</p>
+            <div
+              style={{
+                background: "rgba(255,68,68,0.1)",
+                border: "1px solid rgba(255,68,68,0.3)",
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 24,
+              }}
+            >
+              <p style={{ color: "#ff4444" }}>
+                {paymentResult.payment.message}
+              </p>
+              <p
+                style={{
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: 13,
+                  marginTop: 8,
+                }}
+              >
+                Attempt {paymentAttempts} of 2
+              </p>
             </div>
           )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              marginBottom: 24,
+            }}
+          >
             <button
               onClick={() => setPaymentMethod("upi")}
               style={{
                 padding: 20,
-                background: paymentMethod === "upi" ? "rgba(255,255,255,0.1)" : "transparent",
+                background:
+                  paymentMethod === "upi"
+                    ? "rgba(255,255,255,0.1)"
+                    : "transparent",
                 border: `2px solid ${paymentMethod === "upi" ? "#fff" : "rgba(255,255,255,0.1)"}`,
                 borderRadius: 12,
                 cursor: "pointer",
@@ -721,14 +1326,19 @@ export default function Dashboard() {
               <CreditCard size={24} color="#fff" />
               <div>
                 <h4 style={{ color: "#fff", fontWeight: 600 }}>UPI Payment</h4>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Pay using any UPI app</p>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+                  Pay using any UPI app
+                </p>
               </div>
             </button>
             <button
               onClick={() => setPaymentMethod("cod")}
               style={{
                 padding: 20,
-                background: paymentMethod === "cod" ? "rgba(255,255,255,0.1)" : "transparent",
+                background:
+                  paymentMethod === "cod"
+                    ? "rgba(255,255,255,0.1)"
+                    : "transparent",
                 border: `2px solid ${paymentMethod === "cod" ? "#fff" : "rgba(255,255,255,0.1)"}`,
                 borderRadius: 12,
                 cursor: "pointer",
@@ -740,21 +1350,39 @@ export default function Dashboard() {
             >
               <Package size={24} color="#fff" />
               <div>
-                <h4 style={{ color: "#fff", fontWeight: 600 }}>Cash on Delivery</h4>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Pay when you receive</p>
+                <h4 style={{ color: "#fff", fontWeight: 600 }}>
+                  Cash on Delivery
+                </h4>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+                  Pay when you receive
+                </p>
               </div>
             </button>
           </div>
 
           <div style={{ display: "flex", gap: 12 }}>
-            <button onClick={() => setCheckoutStep(2)} className="btn-secondary" style={{ flex: 1 }}>Back</button>
             <button
-              onClick={paymentResult?.payment?.can_retry ? retryPayment : handleCheckout}
+              onClick={() => setCheckoutStep(2)}
+              className="btn-secondary"
+              style={{ flex: 1 }}
+            >
+              Back
+            </button>
+            <button
+              onClick={
+                paymentResult?.payment?.can_retry
+                  ? retryPayment
+                  : handleCheckout
+              }
               className="btn-primary"
               style={{ flex: 2 }}
               disabled={loading}
             >
-              {loading ? "Processing..." : paymentResult?.payment?.can_retry ? "Retry Payment" : "Pay Now"}
+              {loading
+                ? "Processing..."
+                : paymentResult?.payment?.can_retry
+                  ? "Retry Payment"
+                  : "Pay Now"}
             </button>
           </div>
         </div>
@@ -762,17 +1390,31 @@ export default function Dashboard() {
 
       {checkoutStep === 4 && (
         <div className="glass-card-strong" style={{ padding: 32 }}>
-          <h2 className="heading-sm" style={{ marginBottom: 8 }}>Select Store Pickup Slot</h2>
-          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>Choose a convenient time to pick up your order</p>
+          <h2 className="heading-sm" style={{ marginBottom: 8 }}>
+            Select Store Pickup Slot
+          </h2>
+          <p style={{ color: "rgba(255,255,255,0.5)", marginBottom: 24 }}>
+            Choose a convenient time to pick up your order
+          </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              marginBottom: 24,
+            }}
+          >
             {storeSlots.map((slot) => (
               <button
                 key={slot.id}
                 onClick={() => setSelectedSlot(slot.id)}
                 style={{
                   padding: 16,
-                  background: selectedSlot === slot.id ? "rgba(255,255,255,0.1)" : "transparent",
+                  background:
+                    selectedSlot === slot.id
+                      ? "rgba(255,255,255,0.1)"
+                      : "transparent",
                   border: `2px solid ${selectedSlot === slot.id ? "#fff" : "rgba(255,255,255,0.1)"}`,
                   borderRadius: 12,
                   cursor: "pointer",
@@ -785,31 +1427,77 @@ export default function Dashboard() {
                 <Calendar size={20} color="#fff" />
                 <div>
                   <p style={{ color: "#fff", fontWeight: 600 }}>{slot.date}</p>
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}><Clock size={12} style={{ display: "inline", marginRight: 4 }} />{slot.time}</p>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+                    <Clock
+                      size={12}
+                      style={{ display: "inline", marginRight: 4 }}
+                    />
+                    {slot.time}
+                  </p>
                 </div>
-                {selectedSlot === slot.id && <Check size={20} color="#fff" style={{ marginLeft: "auto" }} />}
+                {selectedSlot === slot.id && (
+                  <Check
+                    size={20}
+                    color="#fff"
+                    style={{ marginLeft: "auto" }}
+                  />
+                )}
               </button>
             ))}
           </div>
 
-          <button onClick={confirmSlot} className="btn-primary" style={{ width: "100%" }} disabled={!selectedSlot}>
+          <button
+            onClick={confirmSlot}
+            className="btn-primary"
+            style={{ width: "100%" }}
+            disabled={!selectedSlot}
+          >
             Confirm Slot
           </button>
         </div>
       )}
 
       {checkoutStep === 5 && (
-        <div className="glass-card-strong" style={{ padding: 40, textAlign: "center" }}>
-          <div style={{ width: 80, height: 80, background: "rgba(81,207,102,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+        <div
+          className="glass-card-strong"
+          style={{ padding: 40, textAlign: "center" }}
+        >
+          <div
+            style={{
+              width: 80,
+              height: 80,
+              background: "rgba(81,207,102,0.2)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 24px",
+            }}
+          >
             <Check size={40} color="#51cf66" />
           </div>
-          <h2 className="heading-md" style={{ marginBottom: 12 }}>Order Confirmed!</h2>
+          <h2 className="heading-md" style={{ marginBottom: 12 }}>
+            Order Confirmed!
+          </h2>
           <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 24 }}>
-            {orderResult ? `Order #${orderResult.order_number}` : "Your order has been placed successfully"}
+            {orderResult
+              ? `Order #${orderResult.order_number}`
+              : "Your order has been placed successfully"}
           </p>
           {aiMessage && (
-            <div style={{ background: "rgba(255,255,255,0.05)", padding: 16, borderRadius: 12, marginBottom: 24 }}>
-              <p style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic" }}>{aiMessage}</p>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                padding: 16,
+                borderRadius: 12,
+                marginBottom: 24,
+              }}
+            >
+              <p
+                style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic" }}
+              >
+                {aiMessage}
+              </p>
             </div>
           )}
           {paymentResult?.delivery?.estimated_date && (
@@ -819,8 +1507,21 @@ export default function Dashboard() {
             </p>
           )}
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-            <button onClick={() => setCurrentView("orders")} className="btn-secondary">View Orders</button>
-            <button onClick={() => { setCurrentView("catalog"); setCheckoutStep(1); }} className="btn-primary">Continue Shopping</button>
+            <button
+              onClick={() => setCurrentView("orders")}
+              className="btn-secondary"
+            >
+              View Orders
+            </button>
+            <button
+              onClick={() => {
+                setCurrentView("catalog");
+                setCheckoutStep(1);
+              }}
+              className="btn-primary"
+            >
+              Continue Shopping
+            </button>
           </div>
         </div>
       )}
@@ -829,43 +1530,84 @@ export default function Dashboard() {
 
   const renderOrders = () => (
     <div style={{ padding: 32 }}>
-      <h1 className="heading-lg" style={{ marginBottom: 32 }}>Order History</h1>
+      <h1 className="heading-lg" style={{ marginBottom: 32 }}>
+        Order History
+      </h1>
 
       {orders.length === 0 ? (
-        <div className="glass-card-strong" style={{ padding: 60, textAlign: "center" }}>
-          <Package size={60} color="rgba(255,255,255,0.2)" style={{ marginBottom: 20 }} />
+        <div
+          className="glass-card-strong"
+          style={{ padding: 60, textAlign: "center" }}
+        >
+          <Package
+            size={60}
+            color="rgba(255,255,255,0.2)"
+            style={{ marginBottom: 20 }}
+          />
           <h3 style={{ marginBottom: 8 }}>No orders yet</h3>
-          <p style={{ color: "rgba(255,255,255,0.5)" }}>Start shopping to see your orders here</p>
+          <p style={{ color: "rgba(255,255,255,0.5)" }}>
+            Start shopping to see your orders here
+          </p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {orders.map((order) => (
             <div key={order.id} className="glass-card" style={{ padding: 24 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 16,
+                }}
+              >
                 <div>
-                  <h4 style={{ fontWeight: 600, marginBottom: 4 }}>Order #{order.order_number}</h4>
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>{order.date}</p>
+                  <h4 style={{ fontWeight: 600, marginBottom: 4 }}>
+                    Order #{order.order_number}
+                  </h4>
+                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+                    {order.date}
+                  </p>
                 </div>
-                <span style={{
-                  padding: "6px 14px",
-                  background: order.status === "delivered" ? "rgba(81,207,102,0.2)" : "rgba(255,255,255,0.1)",
-                  color: order.status === "delivered" ? "#51cf66" : "#fff",
-                  borderRadius: 20,
-                  fontSize: 13,
-                  textTransform: "capitalize"
-                }}>
+                <span
+                  style={{
+                    padding: "6px 14px",
+                    background:
+                      order.status === "delivered"
+                        ? "rgba(81,207,102,0.2)"
+                        : "rgba(255,255,255,0.1)",
+                    color: order.status === "delivered" ? "#51cf66" : "#fff",
+                    borderRadius: 20,
+                    fontSize: 13,
+                    textTransform: "capitalize",
+                  }}
+                >
                   {order.status}
                 </span>
               </div>
-              <p style={{ fontWeight: 600, marginBottom: 16 }}>Rs. {order.total}</p>
+              <p style={{ fontWeight: 600, marginBottom: 16 }}>
+                Rs. {order.total}
+              </p>
               <div style={{ display: "flex", gap: 12 }}>
-                <button onClick={() => trackOrder(order.id)} className="btn-secondary" style={{ padding: "10px 16px", fontSize: 13 }}>
+                <button
+                  onClick={() => trackOrder(order.id)}
+                  className="btn-secondary"
+                  style={{ padding: "10px 16px", fontSize: 13 }}
+                >
                   <Truck size={14} style={{ marginRight: 6 }} /> Track
                 </button>
-                <button onClick={() => setFeedbackOrder(order.id)} className="btn-secondary" style={{ padding: "10px 16px", fontSize: 13 }}>
+                <button
+                  onClick={() => setFeedbackOrder(order.id)}
+                  className="btn-secondary"
+                  style={{ padding: "10px 16px", fontSize: 13 }}
+                >
                   <Star size={14} style={{ marginRight: 6 }} /> Feedback
                 </button>
-                <button onClick={() => setReturnOrder(order.id)} className="btn-secondary" style={{ padding: "10px 16px", fontSize: 13 }}>
+                <button
+                  onClick={() => setReturnOrder(order.id)}
+                  className="btn-secondary"
+                  style={{ padding: "10px 16px", fontSize: 13 }}
+                >
                   <RefreshCw size={14} style={{ marginRight: 6 }} /> Return
                 </button>
               </div>
@@ -875,22 +1617,74 @@ export default function Dashboard() {
       )}
 
       {trackingData && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div className="glass-card-strong" style={{ padding: 32, maxWidth: 500, width: "100%" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <div
+            className="glass-card-strong"
+            style={{ padding: 32, maxWidth: 500, width: "100%" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 24,
+              }}
+            >
               <h3 className="heading-sm">Order Tracking</h3>
-              <button onClick={() => setTrackingData(null)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={24} /></button>
+              <button
+                onClick={() => setTrackingData(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={24} />
+              </button>
             </div>
-            <p style={{ marginBottom: 20 }}>Order #{trackingData.order_number}</p>
+            <p style={{ marginBottom: 20 }}>
+              Order #{trackingData.order_number}
+            </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {trackingData.timeline?.map((step: any, i: number) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: step.completed ? "#51cf66" : "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div
+                  key={i}
+                  style={{ display: "flex", alignItems: "center", gap: 16 }}
+                >
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      background: step.completed
+                        ? "#51cf66"
+                        : "rgba(255,255,255,0.1)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     {step.completed && <Check size={16} color="#fff" />}
                   </div>
                   <div>
                     <p style={{ fontWeight: 500 }}>{step.status}</p>
-                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{step.date}</p>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+                      {step.date}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -900,16 +1694,65 @@ export default function Dashboard() {
       )}
 
       {feedbackOrder && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div className="glass-card-strong" style={{ padding: 32, maxWidth: 450, width: "100%" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <div
+            className="glass-card-strong"
+            style={{ padding: 32, maxWidth: 450, width: "100%" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 24,
+              }}
+            >
               <h3 className="heading-sm">Leave Feedback</h3>
-              <button onClick={() => setFeedbackOrder(null)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={24} /></button>
+              <button
+                onClick={() => setFeedbackOrder(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={24} />
+              </button>
             </div>
             <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <button key={star} onClick={() => setFeedbackRating(star)} style={{ background: "none", border: "none", cursor: "pointer" }}>
-                  <Star size={28} fill={star <= feedbackRating ? "#ffd43b" : "transparent"} color={star <= feedbackRating ? "#ffd43b" : "rgba(255,255,255,0.3)"} />
+                <button
+                  key={star}
+                  onClick={() => setFeedbackRating(star)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Star
+                    size={28}
+                    fill={star <= feedbackRating ? "#ffd43b" : "transparent"}
+                    color={
+                      star <= feedbackRating
+                        ? "#ffd43b"
+                        : "rgba(255,255,255,0.3)"
+                    }
+                  />
                 </button>
               ))}
             </div>
@@ -917,27 +1760,92 @@ export default function Dashboard() {
               value={feedbackComment}
               onChange={(e) => setFeedbackComment(e.target.value)}
               placeholder="Share your experience..."
-              style={{ width: "100%", height: 120, padding: 16, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", resize: "none", marginBottom: 20 }}
+              style={{
+                width: "100%",
+                height: 120,
+                padding: 16,
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                color: "#fff",
+                resize: "none",
+                marginBottom: 20,
+              }}
             />
-            <button onClick={submitFeedback} className="btn-primary" style={{ width: "100%" }}>Submit Feedback</button>
+            <button
+              onClick={submitFeedback}
+              className="btn-primary"
+              style={{ width: "100%" }}
+            >
+              Submit Feedback
+            </button>
           </div>
         </div>
       )}
 
       {returnOrder && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div className="glass-card-strong" style={{ padding: 32, maxWidth: 450, width: "100%" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <div
+            className="glass-card-strong"
+            style={{ padding: 32, maxWidth: 450, width: "100%" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 24,
+              }}
+            >
               <h3 className="heading-sm">Request Return</h3>
-              <button onClick={() => setReturnOrder(null)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={24} /></button>
+              <button
+                onClick={() => setReturnOrder(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={24} />
+              </button>
             </div>
             <textarea
               value={returnReason}
               onChange={(e) => setReturnReason(e.target.value)}
               placeholder="Reason for return..."
-              style={{ width: "100%", height: 120, padding: 16, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff", resize: "none", marginBottom: 20 }}
+              style={{
+                width: "100%",
+                height: 120,
+                padding: 16,
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 12,
+                color: "#fff",
+                resize: "none",
+                marginBottom: 20,
+              }}
             />
-            <button onClick={submitReturn} className="btn-primary" style={{ width: "100%" }}>Submit Request</button>
+            <button
+              onClick={submitReturn}
+              className="btn-primary"
+              style={{ width: "100%" }}
+            >
+              Submit Request
+            </button>
           </div>
         </div>
       )}
@@ -946,24 +1854,52 @@ export default function Dashboard() {
 
   const renderSupport = () => (
     <div style={{ padding: 32 }}>
-      <h1 className="heading-lg" style={{ marginBottom: 8 }}>Customer Support</h1>
-      <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>How can we help you today?</p>
+      <h1 className="heading-lg" style={{ marginBottom: 8 }}>
+        Customer Support
+      </h1>
+      <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 32 }}>
+        How can we help you today?
+      </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-        <div className="glass-card glass-card-hover" style={{ padding: 24, cursor: "pointer" }} onClick={() => setCurrentView("orders")}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 20,
+        }}
+      >
+        <div
+          className="glass-card glass-card-hover"
+          style={{ padding: 24, cursor: "pointer" }}
+          onClick={() => setCurrentView("orders")}
+        >
           <Truck size={32} color="#fff" style={{ marginBottom: 16 }} />
           <h3 style={{ fontWeight: 600, marginBottom: 8 }}>Track Shipment</h3>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Check the status of your orders</p>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+            Check the status of your orders
+          </p>
         </div>
-        <div className="glass-card glass-card-hover" style={{ padding: 24, cursor: "pointer" }}>
+        <div
+          className="glass-card glass-card-hover"
+          style={{ padding: 24, cursor: "pointer" }}
+        >
           <RefreshCw size={32} color="#fff" style={{ marginBottom: 16 }} />
-          <h3 style={{ fontWeight: 600, marginBottom: 8 }}>Returns & Exchange</h3>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Initiate return or exchange requests</p>
+          <h3 style={{ fontWeight: 600, marginBottom: 8 }}>
+            Returns & Exchange
+          </h3>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+            Initiate return or exchange requests
+          </p>
         </div>
-        <div className="glass-card glass-card-hover" style={{ padding: 24, cursor: "pointer" }}>
+        <div
+          className="glass-card glass-card-hover"
+          style={{ padding: 24, cursor: "pointer" }}
+        >
           <MessageSquare size={32} color="#fff" style={{ marginBottom: 16 }} />
           <h3 style={{ fontWeight: 600, marginBottom: 8 }}>Give Feedback</h3>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Share your shopping experience</p>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>
+            Share your shopping experience
+          </p>
         </div>
       </div>
     </div>
