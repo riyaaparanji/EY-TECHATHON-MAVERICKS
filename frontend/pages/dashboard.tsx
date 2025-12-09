@@ -33,6 +33,20 @@ interface Message {
 const getProductImage = (title: string, desc: string): string => {
   const text = `${title} ${desc}`.toLowerCase();
 
+  // Shirts - matching your products
+  if (text.includes("black") && text.includes("shirt")) {
+    return "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop"; // Black shirt
+  }
+  if (text.includes("denim") || (text.includes("blue") && text.includes("shirt"))) {
+    return "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop"; // Denim/blue shirt
+  }
+  if (text.includes("linen") || (text.includes("white") && text.includes("shirt"))) {
+    return "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop"; // White/linen shirt
+  }
+  if (text.includes("shirt")) {
+    return "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop"; // Generic shirt
+  }
+
   if (
     text.includes("shoe") ||
     text.includes("sneaker") ||
