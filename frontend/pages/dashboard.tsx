@@ -25,7 +25,7 @@ interface Product {
 }
 
 interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistsant";
   content: string;
   timestamp: Date;
 }
@@ -33,108 +33,18 @@ interface Message {
 const getProductImage = (title: string, desc: string): string => {
   const text = `${title} ${desc}`.toLowerCase();
 
-  // Shirts - matching your products
-  if (text.includes("black") && text.includes("shirt")) {
-    return "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop"; // Black shirt
-  }
-  if (text.includes("denim") || (text.includes("blue") && text.includes("shirt"))) {
-    return "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop"; // Denim/blue shirt
-  }
-  if (text.includes("linen") || (text.includes("white") && text.includes("shirt"))) {
-    return "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop"; // White/linen shirt
-  }
-  if (text.includes("shirt")) {
-    return "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop"; // Generic shirt
+  if (
+    text.includes("black cotton shirt") // <- lowercase
+  ) {
+    return "https://skream.in/cdn/shop/files/anarchybillieeilishoversizedtee.webp?v=1750396309";
   }
 
-  if (
-    text.includes("shoe") ||
-    text.includes("sneaker") ||
-    text.includes("footwear")
-  ) {
-    return "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop";
+  if (text.includes("white linen shirt")) {
+    return "https://i.pinimg.com/564x/31/70/d3/3170d3bc95a5610577807ce243dee17b.jpg";
   }
-  if (text.includes("watch") || text.includes("smartwatch")) {
-    return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("headphone") ||
-    text.includes("earphone") ||
-    text.includes("audio")
-  ) {
-    return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("laptop") ||
-    text.includes("computer") ||
-    text.includes("macbook")
-  ) {
-    return "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("phone") ||
-    text.includes("smartphone") ||
-    text.includes("iphone")
-  ) {
-    return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop";
-  }
-  if (text.includes("camera") || text.includes("photography")) {
-    return "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("bag") ||
-    text.includes("backpack") ||
-    text.includes("luggage")
-  ) {
-    return "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("jacket") ||
-    text.includes("coat") ||
-    text.includes("clothing")
-  ) {
-    return "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("sunglasses") ||
-    text.includes("glasses") ||
-    text.includes("eyewear")
-  ) {
-    return "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("perfume") ||
-    text.includes("fragrance") ||
-    text.includes("cologne")
-  ) {
-    return "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("jewelry") ||
-    text.includes("necklace") ||
-    text.includes("ring")
-  ) {
-    return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("chair") ||
-    text.includes("furniture") ||
-    text.includes("desk")
-  ) {
-    return "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop";
-  }
-  if (text.includes("book") || text.includes("reading")) {
-    return "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop";
-  }
-  if (text.includes("speaker") || text.includes("bluetooth")) {
-    return "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop";
-  }
-  if (
-    text.includes("keyboard") ||
-    text.includes("mouse") ||
-    text.includes("gaming")
-  ) {
-    return "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop";
+
+  if (text.includes("blue denim")) {
+    return "https://powerlook.in/cdn/shop/files/1395621_3.jpg?v=1755937736";
   }
 
   const fallbackImages = [
