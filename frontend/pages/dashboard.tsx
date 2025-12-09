@@ -32,61 +32,105 @@ interface Message {
 
 const getProductImage = (title: string, desc: string): string => {
   const text = `${title} ${desc}`.toLowerCase();
-  
-  if (text.includes('shoe') || text.includes('sneaker') || text.includes('footwear')) {
-    return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop';
+
+  if (
+    text.includes("shoe") ||
+    text.includes("sneaker") ||
+    text.includes("footwear")
+  ) {
+    return "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop";
   }
-  if (text.includes('watch') || text.includes('smartwatch')) {
-    return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop';
+  if (text.includes("watch") || text.includes("smartwatch")) {
+    return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop";
   }
-  if (text.includes('headphone') || text.includes('earphone') || text.includes('audio')) {
-    return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop';
+  if (
+    text.includes("headphone") ||
+    text.includes("earphone") ||
+    text.includes("audio")
+  ) {
+    return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop";
   }
-  if (text.includes('laptop') || text.includes('computer') || text.includes('macbook')) {
-    return 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop';
+  if (
+    text.includes("laptop") ||
+    text.includes("computer") ||
+    text.includes("macbook")
+  ) {
+    return "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop";
   }
-  if (text.includes('phone') || text.includes('smartphone') || text.includes('iphone')) {
-    return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop';
+  if (
+    text.includes("phone") ||
+    text.includes("smartphone") ||
+    text.includes("iphone")
+  ) {
+    return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop";
   }
-  if (text.includes('camera') || text.includes('photography')) {
-    return 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop';
+  if (text.includes("camera") || text.includes("photography")) {
+    return "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop";
   }
-  if (text.includes('bag') || text.includes('backpack') || text.includes('luggage')) {
-    return 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop';
+  if (
+    text.includes("bag") ||
+    text.includes("backpack") ||
+    text.includes("luggage")
+  ) {
+    return "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop";
   }
-  if (text.includes('jacket') || text.includes('coat') || text.includes('clothing')) {
-    return 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop';
+  if (
+    text.includes("jacket") ||
+    text.includes("coat") ||
+    text.includes("clothing")
+  ) {
+    return "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop";
   }
-  if (text.includes('sunglasses') || text.includes('glasses') || text.includes('eyewear')) {
-    return 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop';
+  if (
+    text.includes("sunglasses") ||
+    text.includes("glasses") ||
+    text.includes("eyewear")
+  ) {
+    return "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop";
   }
-  if (text.includes('perfume') || text.includes('fragrance') || text.includes('cologne')) {
-    return 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop';
+  if (
+    text.includes("perfume") ||
+    text.includes("fragrance") ||
+    text.includes("cologne")
+  ) {
+    return "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop";
   }
-  if (text.includes('jewelry') || text.includes('necklace') || text.includes('ring')) {
-    return 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop';
+  if (
+    text.includes("jewelry") ||
+    text.includes("necklace") ||
+    text.includes("ring")
+  ) {
+    return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop";
   }
-  if (text.includes('chair') || text.includes('furniture') || text.includes('desk')) {
-    return 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop';
+  if (
+    text.includes("chair") ||
+    text.includes("furniture") ||
+    text.includes("desk")
+  ) {
+    return "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop";
   }
-  if (text.includes('book') || text.includes('reading')) {
-    return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop';
+  if (text.includes("book") || text.includes("reading")) {
+    return "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop";
   }
-  if (text.includes('speaker') || text.includes('bluetooth')) {
-    return 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop';
+  if (text.includes("speaker") || text.includes("bluetooth")) {
+    return "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop";
   }
-  if (text.includes('keyboard') || text.includes('mouse') || text.includes('gaming')) {
-    return 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop';
+  if (
+    text.includes("keyboard") ||
+    text.includes("mouse") ||
+    text.includes("gaming")
+  ) {
+    return "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop";
   }
-  
+
   const fallbackImages = [
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop',
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop",
   ];
-  
-  const hash = title.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+
+  const hash = title.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
   return fallbackImages[hash % fallbackImages.length];
 };
 
@@ -101,8 +145,12 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [sortBy, setSortBy] = useState<"default" | "price-low" | "price-high" | "name">("default");
-  const [priceRange, setPriceRange] = useState<"all" | "under500" | "500-1000" | "over1000">("all");
+  const [sortBy, setSortBy] = useState<
+    "default" | "price-low" | "price-high" | "name"
+  >("default");
+  const [priceRange, setPriceRange] = useState<
+    "all" | "under500" | "500-1000" | "over1000"
+  >("all");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -117,16 +165,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     let result = [...products];
-    
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (p) =>
           p.title.toLowerCase().includes(query) ||
-          p.desc.toLowerCase().includes(query)
+          p.desc.toLowerCase().includes(query),
       );
     }
-    
+
     if (priceRange !== "all") {
       result = result.filter((p) => {
         if (priceRange === "under500") return p.price < 500;
@@ -135,7 +183,7 @@ export default function Dashboard() {
         return true;
       });
     }
-    
+
     if (sortBy === "price-low") {
       result.sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-high") {
@@ -143,7 +191,7 @@ export default function Dashboard() {
     } else if (sortBy === "name") {
       result.sort((a, b) => a.title.localeCompare(b.title));
     }
-    
+
     setFilteredProducts(result);
   }, [products, searchQuery, sortBy, priceRange]);
 
@@ -300,7 +348,13 @@ export default function Dashboard() {
               </button>
             </div>
             {searchQuery && (
-              <div style={{ marginTop: "16px", color: "#888888", fontSize: "14px" }}>
+              <div
+                style={{
+                  marginTop: "16px",
+                  color: "#888888",
+                  fontSize: "14px",
+                }}
+              >
                 Found {filteredProducts.length} products
               </div>
             )}
@@ -336,8 +390,19 @@ export default function Dashboard() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-              <h3 style={{ fontSize: "20px", fontWeight: 600, color: "#FFFFFF" }}>Filters</h3>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "24px",
+              }}
+            >
+              <h3
+                style={{ fontSize: "20px", fontWeight: 600, color: "#FFFFFF" }}
+              >
+                Filters
+              </h3>
               <button
                 onClick={() => setShowFilterModal(false)}
                 style={{
@@ -352,7 +417,14 @@ export default function Dashboard() {
             </div>
 
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ display: "block", color: "#888888", fontSize: "14px", marginBottom: "8px" }}>
+              <label
+                style={{
+                  display: "block",
+                  color: "#888888",
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                }}
+              >
                 Sort By
               </label>
               <select
@@ -377,12 +449,21 @@ export default function Dashboard() {
             </div>
 
             <div style={{ marginBottom: "32px" }}>
-              <label style={{ display: "block", color: "#888888", fontSize: "14px", marginBottom: "8px" }}>
+              <label
+                style={{
+                  display: "block",
+                  color: "#888888",
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                }}
+              >
                 Price Range
               </label>
               <select
                 value={priceRange}
-                onChange={(e) => setPriceRange(e.target.value as typeof priceRange)}
+                onChange={(e) =>
+                  setPriceRange(e.target.value as typeof priceRange)
+                }
                 style={{
                   width: "100%",
                   padding: "12px 16px",
@@ -471,7 +552,7 @@ export default function Dashboard() {
               className="heading-md"
               style={{ marginBottom: "6px", fontWeight: 800, color: "#FFFFFF" }}
             >
-              Luxe Market
+              Dashboard
             </h1>
             <p
               className="body-sm"
@@ -505,40 +586,48 @@ export default function Dashboard() {
               alignItems: "center",
               gap: "10px",
               padding: "12px 20px",
-              borderColor: (sortBy !== "default" || priceRange !== "all") ? "rgba(255, 255, 255, 0.4)" : undefined,
+              borderColor:
+                sortBy !== "default" || priceRange !== "all"
+                  ? "rgba(255, 255, 255, 0.4)"
+                  : undefined,
             }}
           >
             <Filter size={18} />
             <span>Filters</span>
             {(sortBy !== "default" || priceRange !== "all") && (
-              <span style={{
-                background: "#FFFFFF",
-                color: "#000000",
-                borderRadius: "50%",
-                width: "20px",
-                height: "20px",
-                fontSize: "12px",
-                fontWeight: 700,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}>
-                {(sortBy !== "default" ? 1 : 0) + (priceRange !== "all" ? 1 : 0)}
+              <span
+                style={{
+                  background: "#FFFFFF",
+                  color: "#000000",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {(sortBy !== "default" ? 1 : 0) +
+                  (priceRange !== "all" ? 1 : 0)}
               </span>
             )}
           </button>
 
           {searchQuery && (
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "8px 16px",
-              background: "rgba(255, 255, 255, 0.05)",
-              borderRadius: "8px",
-              fontSize: "14px",
-              color: "#888888",
-            }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                background: "rgba(255, 255, 255, 0.05)",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "#888888",
+              }}
+            >
               <span>"{searchQuery}"</span>
               <button
                 onClick={() => setSearchQuery("")}
@@ -601,10 +690,13 @@ export default function Dashboard() {
                 style={{ display: "flex", alignItems: "center", gap: "12px" }}
               >
                 <span className="body-sm" style={{ color: "#666666" }}>
-                  {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
+                  {filteredProducts.length}{" "}
+                  {filteredProducts.length === 1 ? "item" : "items"}
                   {searchQuery && ` matching "${searchQuery}"`}
                 </span>
-                {(sortBy !== "default" || priceRange !== "all" || searchQuery) && (
+                {(sortBy !== "default" ||
+                  priceRange !== "all" ||
+                  searchQuery) && (
                   <button
                     onClick={clearFilters}
                     style={{
@@ -627,7 +719,10 @@ export default function Dashboard() {
                 onClick={() => setViewMode("grid")}
                 style={{
                   padding: "10px",
-                  background: viewMode === "grid" ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                  background:
+                    viewMode === "grid"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "transparent",
                   border: "1px solid rgba(255, 255, 255, 0.1)",
                   borderRadius: "10px",
                   color: viewMode === "grid" ? "#FFFFFF" : "#666666",
@@ -641,7 +736,10 @@ export default function Dashboard() {
                 onClick={() => setViewMode("list")}
                 style={{
                   padding: "10px",
-                  background: viewMode === "list" ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                  background:
+                    viewMode === "list"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "transparent",
                   border: "1px solid rgba(255, 255, 255, 0.1)",
                   borderRadius: "10px",
                   color: viewMode === "list" ? "#FFFFFF" : "#666666",
@@ -666,15 +764,25 @@ export default function Dashboard() {
             }}
           >
             {filteredProducts.length === 0 ? (
-              <div style={{
-                gridColumn: "1 / -1",
-                textAlign: "center",
-                padding: "80px 20px",
-                color: "#666666",
-              }}>
-                <Search size={48} color="#333333" style={{ marginBottom: "16px" }} />
-                <p style={{ fontSize: "18px", marginBottom: "8px" }}>No products found</p>
-                <p style={{ fontSize: "14px" }}>Try adjusting your search or filters</p>
+              <div
+                style={{
+                  gridColumn: "1 / -1",
+                  textAlign: "center",
+                  padding: "80px 20px",
+                  color: "#666666",
+                }}
+              >
+                <Search
+                  size={48}
+                  color="#333333"
+                  style={{ marginBottom: "16px" }}
+                />
+                <p style={{ fontSize: "18px", marginBottom: "8px" }}>
+                  No products found
+                </p>
+                <p style={{ fontSize: "14px" }}>
+                  Try adjusting your search or filters
+                </p>
               </div>
             ) : (
               filteredProducts.map((p, idx) => (
@@ -705,7 +813,8 @@ export default function Dashboard() {
                         width: "100%",
                         height: "100%",
                         objectFit: "cover",
-                        transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                        transition:
+                          "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
                         filter: "grayscale(20%)",
                       }}
                       onMouseEnter={(e) => {
@@ -979,8 +1088,15 @@ export default function Dashboard() {
                 >
                   Start a Conversation
                 </h4>
-                <p style={{ color: "#666666", fontSize: "14px", lineHeight: 1.6 }}>
-                  Ask about products, get recommendations, or add items to your cart
+                <p
+                  style={{
+                    color: "#666666",
+                    fontSize: "14px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  Ask about products, get recommendations, or add items to your
+                  cart
                 </p>
               </div>
             )}
@@ -990,7 +1106,8 @@ export default function Dashboard() {
                 key={idx}
                 style={{
                   display: "flex",
-                  justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+                  justifyContent:
+                    msg.role === "user" ? "flex-end" : "flex-start",
                   marginBottom: "16px",
                   animation: "slideUp 0.3s ease-out",
                 }}
@@ -1004,7 +1121,9 @@ export default function Dashboard() {
                         ? "20px 20px 4px 20px"
                         : "20px 20px 20px 4px",
                     background:
-                      msg.role === "user" ? "#FFFFFF" : "rgba(255, 255, 255, 0.05)",
+                      msg.role === "user"
+                        ? "#FFFFFF"
+                        : "rgba(255, 255, 255, 0.05)",
                     color: msg.role === "user" ? "#000000" : "#FFFFFF",
                     fontSize: "15px",
                     lineHeight: 1.5,
@@ -1016,7 +1135,13 @@ export default function Dashboard() {
             ))}
 
             {loading && (
-              <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-start",
+                  marginBottom: "16px",
+                }}
+              >
                 <div
                   style={{
                     padding: "16px 20px",
@@ -1078,7 +1203,9 @@ export default function Dashboard() {
               style={{
                 width: "48px",
                 height: "48px",
-                background: inputValue.trim() ? "#FFFFFF" : "rgba(255, 255, 255, 0.1)",
+                background: inputValue.trim()
+                  ? "#FFFFFF"
+                  : "rgba(255, 255, 255, 0.1)",
                 border: "none",
                 borderRadius: "12px",
                 display: "flex",
