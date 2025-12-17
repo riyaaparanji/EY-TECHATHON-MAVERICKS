@@ -9,12 +9,13 @@ A comprehensive e-commerce platform with AI-powered shopping agents, built with 
 │   ├── app.py            # Main API endpoints and authentication
 │   ├── database.py       # SQLAlchemy database models
 │   ├── ai_agents.py      # AI-powered shopping agents with OpenAI
+│   ├── fashion_chatbot.py # LangGraph-style conversational shopping assistant
 │   ├── seed_data.py      # Database seeding (150 products, 9 stores, offers)
 │   └── ey_groq_adapter.py  # Legacy adapter (unused)
 ├── frontend/             # Next.js React frontend
 │   ├── pages/
 │   │   ├── index.tsx     # Login/Registration page
-│   │   └── dashboard.tsx # Main shopping dashboard
+│   │   └── dashboard.tsx # Main shopping dashboard with AI chatbot
 │   ├── styles/
 │   │   └── globals.css   # Global styles with dark theme
 │   └── next.config.js    # Next.js configuration with API proxy
@@ -81,6 +82,11 @@ The application runs with two workflows:
 - `GET /api/orders` - Order history
 - `POST /api/payment/retry` - Retry failed payment
 
+### Chatbot
+- `GET /api/chat/start` - Start new chat session
+- `POST /api/chat` - Send message to chatbot
+- `POST /api/chat/reset` - Reset chat session
+
 ### Reference Data
 - `GET /api/cities` - List cities (Hyderabad, Mumbai, Delhi)
 - `GET /api/stores` - List stores by city
@@ -96,7 +102,14 @@ The application runs with two workflows:
 - `OPENAI_API_KEY` - OpenAI API key for AI agent responses (optional)
 
 ## Recent Changes
-- Dec 2025: Complete e-commerce platform with 6 AI agents
+- Dec 2025: LangGraph-style AI Fashion Chatbot with state-machine flow
+  - Product selection (shirts/pants/ethnic/athleisure)
+  - Smart recommendations based on cart contents
+  - Bank offers (HDFC ₹300/ICICI ₹250/SBI ₹200)
+  - Payment with retry logic (2 attempts max)
+  - Invoice generation with UUID
+  - Post-purchase support and CSAT ratings
+- Complete e-commerce platform with 6 AI agents
 - Authentication with city/store selection
 - Payment retry logic with 70% success simulation
 - OpenAI integration for intelligent agent responses
