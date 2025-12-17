@@ -24,6 +24,8 @@ import {
   Percent,
   Search,
   Filter,
+  Bot,
+  Send,
 } from "lucide-react";
 
 interface Product {
@@ -74,7 +76,13 @@ type ViewType =
   | "cart"
   | "checkout"
   | "orders"
-  | "support";
+  | "support"
+  | "chatbot";
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
 
 export default function Dashboard() {
   const router = useRouter();
@@ -108,6 +116,11 @@ export default function Dashboard() {
   const [returnOrder, setReturnOrder] = useState<number | null>(null);
   const [returnReason, setReturnReason] = useState("");
   const [trackingData, setTrackingData] = useState<any>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatEnded, setChatEnded] = useState(false);
 
   const categories = [
     "all",
@@ -400,6 +413,7 @@ export default function Dashboard() {
             label: `Cart (${cart.items.length})`,
           },
           { id: "orders", icon: Truck, label: "Orders" },
+          { id: "chatbot", icon: Bot, label: "AI Assistant" },
           { id: "support", icon: MessageSquare, label: "Support" },
         ].map((item) => (
           <button
@@ -1852,6 +1866,248 @@ export default function Dashboard() {
     </div>
   );
 
+  const startChatSession = async () => {
+    try {
+      setChatLoading(true);
+      const res = await authFetch("/api/chat/start");
+      const data = await res.json();
+      setChatSessionId(data.session_id);
+      setChatMessages([{ role: "assistant", content: data.response }]);
+      setChatEnded(false);
+    } catch (error) {
+      console.error("Failed to start chat:", error);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || chatLoading) return;
+
+    const userMessage = chatInput.trim();
+    setChatInput("");
+    setChatMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setChatLoading(true);
+
+    try {
+      const res = await authFetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage, session_id: chatSessionId }),
+      });
+      const data = await res.json();
+      setChatSessionId(data.session_id);
+      setChatMessages((prev) => [...prev, { role: "assistant", content: data.response }]);
+      if (data.ended) {
+        setChatEnded(true);
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setChatMessages((prev) => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const resetChat = () => {
+    setChatMessages([]);
+    setChatSessionId(null);
+    setChatEnded(false);
+  };
+
+  const renderChatbot = () => (
+    <div style={{ padding: 32, height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <div>
+          <h1 className="heading-lg" style={{ marginBottom: 8 }}>
+            AI Fashion Assistant
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.6)" }}>
+            Shop with our intelligent shopping assistant
+          </p>
+        </div>
+        {chatMessages.length > 0 && (
+          <button
+            onClick={resetChat}
+            className="btn-secondary"
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <RefreshCw size={16} />
+            New Chat
+          </button>
+        )}
+      </div>
+
+      {chatMessages.length === 0 ? (
+        <div
+          className="glass-card"
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            padding: 48,
+          }}
+        >
+          <div
+            style={{
+              width: 80,
+              height: 80,
+              background: "rgba(255,255,255,0.1)",
+              borderRadius: 20,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 24,
+            }}
+          >
+            <Bot size={40} color="#fff" />
+          </div>
+          <h2 className="heading-md" style={{ marginBottom: 12 }}>
+            Smart Fashion Store AI
+          </h2>
+          <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 24, maxWidth: 400 }}>
+            Get personalized shopping assistance. Browse products, get recommendations, and complete your purchase with our AI assistant.
+          </p>
+          <button onClick={startChatSession} className="btn-primary" disabled={chatLoading}>
+            {chatLoading ? "Starting..." : "Start Shopping"}
+          </button>
+        </div>
+      ) : (
+        <div
+          className="glass-card"
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            padding: 0,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: 24,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            {chatMessages.map((msg, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: "flex",
+                  justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+                }}
+              >
+                <div
+                  style={{
+                    maxWidth: "80%",
+                    padding: "12px 16px",
+                    borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                    background: msg.role === "user" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {msg.role === "assistant" && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                      <Bot size={16} color="rgba(255,255,255,0.7)" />
+                      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Assistant</span>
+                    </div>
+                  )}
+                  <p style={{ margin: 0, lineHeight: 1.5 }}>{msg.content}</p>
+                </div>
+              </div>
+            ))}
+            {chatLoading && (
+              <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: "16px 16px 16px 4px",
+                    background: "rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <span className="typing-dot" />
+                    <span className="typing-dot" style={{ animationDelay: "0.2s" }} />
+                    <span className="typing-dot" style={{ animationDelay: "0.4s" }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {!chatEnded && (
+            <div
+              style={{
+                padding: 16,
+                borderTop: "1px solid rgba(255,255,255,0.1)",
+                display: "flex",
+                gap: 12,
+              }}
+            >
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && sendChatMessage()}
+                placeholder="Type your message..."
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 12,
+                  color: "#fff",
+                  fontSize: 14,
+                }}
+              />
+              <button
+                onClick={sendChatMessage}
+                disabled={chatLoading || !chatInput.trim()}
+                style={{
+                  padding: "12px 20px",
+                  background: chatInput.trim() ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)",
+                  border: "none",
+                  borderRadius: 12,
+                  color: "#fff",
+                  cursor: chatInput.trim() ? "pointer" : "not-allowed",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          )}
+
+          {chatEnded && (
+            <div
+              style={{
+                padding: 16,
+                borderTop: "1px solid rgba(255,255,255,0.1)",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 12 }}>
+                Chat session ended
+              </p>
+              <button onClick={resetChat} className="btn-primary">
+                Start New Chat
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   const renderSupport = () => (
     <div style={{ padding: 32 }}>
       <h1 className="heading-lg" style={{ marginBottom: 8 }}>
@@ -1914,6 +2170,7 @@ export default function Dashboard() {
         {currentView === "cart" && renderCart()}
         {currentView === "checkout" && renderCheckout()}
         {currentView === "orders" && renderOrders()}
+        {currentView === "chatbot" && renderChatbot()}
         {currentView === "support" && renderSupport()}
       </main>
     </div>

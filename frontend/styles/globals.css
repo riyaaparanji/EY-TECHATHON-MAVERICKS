@@ -393,3 +393,23 @@ input::placeholder, textarea::placeholder {
 .hover-glow:hover {
   filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
 }
+
+/* Typing Animation */
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+@keyframes typing {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
