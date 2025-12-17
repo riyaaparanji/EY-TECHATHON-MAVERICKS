@@ -2,6 +2,8 @@
 ### EY Techathon 6.0 | Team Mavericks
 
 ---
+🎥 **Watch the Full Working Demo (3–4 mins):**  
+👉 **YouTube Demo Video:** https://www.youtube.com/watch?v=tmCWYhV8wxI
 
 ## 📌 Problem Statement  
 **Retail Fashion & Lifestyle (ABFRL – Omnichannel Retail Ecosystem)**
