@@ -95,10 +95,8 @@ Handles returns and exchanges without resetting the session.
 ├── README.md
 └── requirements.txt
 
-yaml
-Copy code
 
----
+
 
 ## 📓 Prototype Notebook  
 
@@ -152,9 +150,8 @@ https://colab.research.google.com/drive/138hUSaNXROHWMrOxCpf9U0H4YoU3Tjc_?usp=sh
 ---
 
 ## 🔚 Final Note  
-
-This project demonstrates how agentic AI systems can be built using structured orchestration rather than prompt-only
+This project demonstrates how agentic AI systems can be built using structured orchestration rather than prompt-only LLMs, making them suitable for real-world retail deployment with measurable ROI.
 ---
 
-## 📂 Repository Structure  
+
 
