@@ -20,6 +20,7 @@ from ai_agents import (
     PaymentAgent, FulfillmentAgent, PostPurchaseSupportAgent
 )
 from seed_data import seed_all
+from fashion_chatbot import create_initial_state, process_message
 
 app = FastAPI(title='Shopping Assistant API')
 
@@ -573,6 +574,50 @@ async def get_dashboard(user: User = Depends(require_user), db: Session = Depend
         "preferences": user.preferences,
         "recommendations": recommendations,
         "offers": offers[:3]
+    }
+
+
+chat_sessions: Dict[str, Dict] = {}
+
+class ChatMessage(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+@app.post('/api/chat')
+async def chat(data: ChatMessage):
+    session_id = data.session_id
+    
+    if not session_id or session_id not in chat_sessions:
+        session_id = str(random.randint(100000, 999999))
+        chat_sessions[session_id] = create_initial_state()
+    
+    state = chat_sessions[session_id]
+    state = process_message(state, data.message)
+    chat_sessions[session_id] = state
+    
+    is_ended = state["step"] == "end"
+    if is_ended:
+        del chat_sessions[session_id]
+    
+    return {
+        "response": state["response"],
+        "session_id": session_id,
+        "ended": is_ended
+    }
+
+@app.post('/api/chat/reset')
+async def reset_chat(session_id: Optional[str] = None):
+    if session_id and session_id in chat_sessions:
+        del chat_sessions[session_id]
+    return {"status": "reset", "message": "Chat session reset successfully"}
+
+@app.get('/api/chat/start')
+async def start_chat():
+    session_id = str(random.randint(100000, 999999))
+    chat_sessions[session_id] = create_initial_state()
+    return {
+        "session_id": session_id,
+        "response": "👗 SMART FASHION STORE AI\n\nWhat are you shopping for? (shirts / pants / ethnic / athleisure)"
     }
 
 

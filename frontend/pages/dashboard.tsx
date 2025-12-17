@@ -383,7 +383,7 @@ export default function Dashboard() {
           🛍️
         </div>
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 700 }}>Shopping</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 700 }}>Dashboard</h2>
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
             AI Assistant
           </p>

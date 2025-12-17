@@ -1,0 +1,92 @@
+Context:
+I already have a working chatbot implemented in a Jupyter notebook. The notebook logic, model loading, preprocessing, inference steps, and response formatting are FINAL and MUST NOT be changed.
+
+I also already have an existing frontend UI in this Replit project.
+
+Your task is to integrate the chatbot backend into my existing Replit UI while ensuring the chatbot produces IDENTICAL outputs to the notebook version for the same input.
+
+STRICT REQUIREMENTS (DO NOT VIOLATE):
+
+DO NOT modify:
+
+Model architecture
+
+Tokenization / embeddings
+
+Prompt templates
+
+Preprocessing logic
+
+Post-processing / response formatting
+
+Inference parameters (temperature, top-k, max tokens, etc.)
+
+The chatbot output must match the notebook output EXACTLY
+
+Same text
+
+Same formatting
+
+Same ordering
+
+No extra explanations or UI-added text
+
+Only refactor for deployment, not logic:
+
+Extract notebook code into reusable functions/modules
+
+Move inference logic into a backend service (e.g., Flask / FastAPI / Node backend if applicable)
+
+The function that generates the response must be a direct port of the notebook cell
+
+INTEGRATION TASKS:
+
+Identify the exact function/cell in the notebook responsible for:
+
+Loading the model
+
+Generating chatbot responses
+
+Convert that logic into a backend endpoint (e.g. /chat)
+
+Connect the endpoint to the existing UI’s input box and send user queries
+
+Display the response in the UI without altering the text in any way
+
+OUTPUT FORMAT REQUIREMENTS:
+
+Return only the chatbot’s raw response
+
+No markdown unless the notebook already outputs markdown
+
+No UI-generated prefixes like:
+
+“Bot says:”
+
+“Here’s your answer:”
+
+Preserve newline behavior exactly
+
+CODE QUALITY REQUIREMENTS:
+
+Use clear function boundaries:
+
+load_model()
+
+generate_response(user_input)
+
+Ensure the model loads once, not on every request
+
+Handle edge cases (empty input, whitespace) exactly as in the notebook
+
+FINAL CHECK BEFORE COMPLETING:
+
+Before finishing, verify:
+
+Same input → byte-level identical output as the notebook
+
+UI sends only raw user input
+
+Backend returns only raw model output
+
+Begin by analyzing the notebook logic and then integrate it into this Replit project without changing behavior.
