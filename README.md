@@ -80,24 +80,6 @@ Handles returns and exchanges without resetting the session.
 - Worker-agent architecture (Recommendation, Payment, Support)  
 
 
-## 📂 Repository Structure  
-
-.
-├── notebooks/
-│ └── ey1.ipynb
-│
-├── data/
-│ └── synthetic_customer_profile_1000.csv
-│
-├── demo/
-│ └── demo_video.mp4
-│
-├── README.md
-└── requirements.txt
-
-
-
-
 ## 📓 Prototype Notebook  
 
 The complete working prototype is implemented in a **Google Colab notebook**.
