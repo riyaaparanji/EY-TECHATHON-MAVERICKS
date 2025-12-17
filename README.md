@@ -101,6 +101,8 @@ https://colab.research.google.com/drive/138hUSaNXROHWMrOxCpf9U0H4YoU3Tjc_?usp=sh
 
 Kindly refer to our demo video to see the UI and our sales agent in action
 
+Video link: https://www.youtube.com/watch?v=tmCWYhV8wxI
+
 
 ## 📊 Impact Metrics (Proposed)
 
