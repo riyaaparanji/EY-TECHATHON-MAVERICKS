@@ -97,6 +97,10 @@ https://colab.research.google.com/drive/138hUSaNXROHWMrOxCpf9U0H4YoU3Tjc_?usp=sh
 - Returns and exchange workflows  
 
 ---
+## 🚀 Live Demo
+
+Kindly refer to our demo video to see the UI and our sales agent in action
+
 
 ## 📊 Impact Metrics (Proposed)
 
