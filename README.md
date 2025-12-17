@@ -2,7 +2,7 @@
 ### EY Techathon 6.0 | Team Mavericks
 
 ---
-🎥 **Watch the Full Working Demo (3–4 mins):**  
+🎥 **Watch the Full Working Demo :**  
 👉 **YouTube Demo Video:** https://www.youtube.com/watch?v=tmCWYhV8wxI
 
 ## 📌 Problem Statement  
